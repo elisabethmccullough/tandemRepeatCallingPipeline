@@ -1,0 +1,12 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%labels
+    Description "Placeholder image definition for tandem-repeat callers"
+
+%post
+    # Caller installation and pinned versions are intentionally deferred.
+    echo "Scaffold only: external callers are not installed."
+
+%runscript
+    echo "Placeholder container: caller installation is not enabled yet."

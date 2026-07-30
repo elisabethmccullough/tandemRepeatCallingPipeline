@@ -1,0 +1,18 @@
+# PRELIMINARY: coordinates and caller parameters require confirmation.
+locus_id: HTT
+gene: HTT
+reference_build: GRCh38
+chromosome: chr4
+target_region:
+  start: null
+  end: null
+repeat:
+  reference_motif: CAG
+  known_interruptions:
+    - CAA
+    - CCG
+    - CCA
+notes:
+  - Coordinates must be confirmed before caller execution.
+  - This configuration is for pipeline development only.
+  - No clinical interpretation is performed.
