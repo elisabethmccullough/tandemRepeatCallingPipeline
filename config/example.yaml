@@ -1,0 +1,22 @@
+run:
+  sample_id: HG00438
+  locus_id: HTT
+  output_root: outputs
+inputs:
+  assembly_fasta: path/to/assembly.fasta
+  mini_bam: path/to/sample.mini.bam
+  mini_bam_index: path/to/sample.mini.bam.bai
+  reference_fasta: path/to/hg38.fasta
+  reference_fasta_index: path/to/hg38.fasta.fai
+locus_config: config/loci/htt_hg38.yaml
+tools:
+  samtools: samtools
+  minimap2: minimap2
+  vamos: vamos
+  straglr: straglr.py
+  lastdb: lastdb
+  lastal: lastal
+  tandem_genotypes: tandem-genotypes
+execution:
+  threads: 4
+  overwrite: false

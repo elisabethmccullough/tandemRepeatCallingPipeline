@@ -1,1 +1,68 @@
 # tandemRepeatCallingPipeline
+
+A reproducible, **non-clinical** pipeline scaffold for comparing tandem-repeat calls from a local assembly and its original coordinate-sorted mini-BAM. No external caller is installed or executed yet; commands, directories, validation, manifests, and a common output contract are established for development.
+
+## Status and planned callers
+
+The scaffold plans VAMOS in read and contig modes, STRaglr on raw reads, and tandem-genotypes after LAST-based preparation. Implementations currently log placeholders rather than invoking these tools. The normalizer writes an empty stable schema; it deliberately does not imply that callers expose equivalent measurements.
+
+## Inputs
+
+A run requires a LoMA-style assembly FASTA, original coordinate-sorted mini-BAM and BAI, reference FASTA and FAI, locus YAML, and filename-safe sample/locus IDs. Inputs are validated as non-empty where appropriate and never modified. Reference assets remain external to Git.
+
+## Install and quick start
+
+Python 3.11 or newer is required.
+
+```bash
+python -m pip install -e ".[dev]"
+bash scripts/run_pipeline.sh --config config/example.yaml --dry-run
+pytest
+```
+
+Edit a copy of `config/example.yaml` first. Relative paths are resolved from the invocation working directory. `--start-stage` and `--stop-stage` accept the numbered names listed below.
+
+## Configuration
+
+```yaml
+run:
+  sample_id: HG00438
+  locus_id: HTT
+  output_root: outputs
+inputs:
+  assembly_fasta: path/to/assembly.fasta
+  mini_bam: path/to/sample.mini.bam
+  mini_bam_index: path/to/sample.mini.bam.bai
+  reference_fasta: path/to/hg38.fasta
+  reference_fasta_index: path/to/hg38.fasta.fai
+locus_config: config/loci/htt_hg38.yaml
+execution:
+  threads: 4
+  overwrite: false
+```
+
+The preliminary HTT file intentionally has null coordinates. Coordinates and tool parameters must be confirmed before real execution.
+
+## Stages and evidence
+
+1. `00_validate_inputs` validates configuration, inputs, identifiers, and reports missing tools as scaffold warnings.
+2. `01_prepare_bam` preserves the **raw-read evidence** via links and represents quickcheck/sort/index operations.
+3. `02_align_assembly` represents minimap2 alignment and sorted BAM creation from **assembly-derived evidence**.
+4. `03_run_vamos_read` uses the original reads; `04_run_vamos_contig` uses the assembled contig alignment.
+5. `05_run_straglr` uses original raw reads.
+6. `06_prepare_tandem_genotypes` and `07_run_tandem_genotypes` prepare and call from their required alignments.
+7. `08_normalize_outputs` maps future native results without manufacturing absent fields.
+
+Raw-read evidence reflects individual alignments and read support. Assembly-derived evidence reflects the assembled sequence and assembly/alignment process. They are complementary, not interchangeable, and provenance remains explicit in `analysis_source`.
+
+## Repository and outputs
+
+Source modules live in `src/tr_calling_pipeline`, entry points in `scripts`, YAML under `config`, tests under `tests`, resources under `resources`, and the future Apptainer recipe under `containers/apptainer`.
+
+Each run creates `outputs/<sample_id>_<locus_id>/` with `00_manifest`, `01_inputs`, `02_prepared_bam`, `03_assembly_alignment`, `04_vamos_read`, `05_vamos_contig`, `06_straglr`, `07_tandem_genotypes`, `08_normalized`, and `logs`. Planned native names are `vamos_read.vcf.gz`, `vamos_contig.vcf.gz`, `straglr.tsv`, `straglr.bed`, and `tandem_genotypes.txt`. Normalized results are `caller_results.tsv`, `caller_results.json`, and `normalization_warnings.tsv`; generated outputs are ignored by Git.
+
+## Reproducibility and limitations
+
+Manifests support resolved paths, SHA-256 checksums, commit identity, tool versions, stage states, outputs, warnings, and completion state. Future work must pin/install caller versions, confirm locus coordinates and caller arguments, implement tool-version capture and lifecycle updates in the orchestrator, implement native parsers, and validate with controlled datasets. Dry-run still requires real non-empty fixture inputs so validation remains meaningful.
+
+This software is for pipeline development and research only. It performs no clinical interpretation and does not classify alleles or provide medical conclusions.
