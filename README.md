@@ -22,6 +22,18 @@ bash scripts/run_pipeline.sh --config config/example.yaml --dry-run
 pytest
 ```
 
+An offline package-portability demonstration (two synthetic sequences, no caller
+execution and no patient data) is available from any working directory:
+
+```bash
+tr-pipeline demo --output "/tmp/demo output"
+tr-pipeline validate-case-package --package "/tmp/demo output/portable synthetic case package"
+```
+
+This compact command deliberately does **not** claim full caller end-to-end verification.
+Full fake-caller stage coverage remains in the integration tests; real bioinformatics
+installations and laboratory workflows remain unverified.
+
 Edit a copy of `config/example.yaml` first. Relative input paths, `locus_config`,
 and `run.output_root` are resolved from the directory containing the supplied run
 configuration YAML, not from the invocation working directory. Absolute paths are

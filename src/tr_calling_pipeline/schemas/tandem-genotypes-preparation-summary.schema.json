@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/tandem-genotypes-preparation-summary.schema.json",
+  "title": "tandem-genotypes-preparation-summary",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "record_schema_version",
+    "stage_id",
+    "status",
+    "preparations",
+    "warnings",
+    "failure"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "stage_id": {
+      "const": "06_prepare_tandem_genotypes"
+    },
+    "status": {
+      "enum": [
+        "PLANNED",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+        "DRY_RUN",
+        "TOOL_MISSING",
+        "INPUT_MISSING",
+        "UNSUPPORTED_VERSION",
+        "UNSUPPORTED_FORMAT",
+        "NOT_COMPUTED"
+      ]
+    },
+    "preparations": {
+      "type": "array",
+      "items": {
+        "$ref": "last-alignment-metadata.schema.json"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failure": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

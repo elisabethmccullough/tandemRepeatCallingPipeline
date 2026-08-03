@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/native-caller-output-registry.schema.json",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "record_schema_version",
+    "outputs"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "file_id",
+          "role",
+          "path",
+          "media_type",
+          "sha256",
+          "size_bytes",
+          "caller",
+          "caller_version",
+          "analysis_source",
+          "producer_command_id"
+        ],
+        "properties": {
+          "file_id": {
+            "type": "string"
+          },
+          "role": {
+            "const": "NATIVE_CALLER_OUTPUT"
+          },
+          "path": {
+            "type": "string"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "caller": {
+            "enum": [
+              "VAMOS",
+              "STRAGLR",
+              "TANDEM_GENOTYPES"
+            ]
+          },
+          "caller_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "analysis_source": {
+            "enum": [
+              "RAW_READS",
+              "ASSEMBLED_CONTIG"
+            ]
+          },
+          "producer_command_id": {
+            "type": "string"
+          },
+          "associated_sequence_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

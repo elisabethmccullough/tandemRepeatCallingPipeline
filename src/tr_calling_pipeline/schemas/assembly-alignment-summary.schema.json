@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "alignment_configuration",
+    "sequence_count",
+    "mapping_status_counts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "alignment_configuration": {
+      "type": "object"
+    },
+    "sequence_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mapping_status_counts": {
+      "type": "object"
+    }
+  }
+}

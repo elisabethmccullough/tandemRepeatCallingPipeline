@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/normalized-caller-evidence.schema.json",
+  "title": "Normalized caller evidence",
+  "description": "Lossless normalized evidence without clinical interpretation or cross-caller prioritization.",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "record_schema_version",
+    "record_id",
+    "case_id",
+    "subject_id",
+    "sample_id",
+    "locus_id",
+    "caller",
+    "caller_version",
+    "analysis_source",
+    "source_file_id",
+    "source_file_sha256",
+    "native_record_identifier",
+    "native_allele_identifier",
+    "associated_sequence_id",
+    "assignment_state",
+    "reference_build",
+    "chromosome",
+    "start",
+    "end",
+    "coordinate_convention",
+    "reported_motif",
+    "reported_motif_chain",
+    "reported_repeat_count",
+    "reported_repeat_length_bp",
+    "supporting_reads",
+    "total_spanning_reads",
+    "quality_state",
+    "raw_fields",
+    "normalization_warnings"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "subject_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "sample_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "locus_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "source_file_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "caller": {
+      "type": "string",
+      "minLength": 1
+    },
+    "caller_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "analysis_source": {
+      "enum": [
+        "RAW_READS",
+        "ASSEMBLED_CONTIG"
+      ]
+    },
+    "source_file_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Lowercase SHA-256 digest."
+    },
+    "native_record_identifier": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Native record identity or explicit unavailable value."
+    },
+    "native_allele_identifier": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Native allele identity; never interpreted as a haplotype."
+    },
+    "associated_sequence_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Direct sequence association, when provided by assembly analysis."
+    },
+    "assignment_state": {
+      "enum": [
+        "DIRECT_SEQUENCE_ASSOCIATION",
+        "UNASSIGNED",
+        "ASSIGNMENT_NOT_APPLICABLE"
+      ]
+    },
+    "reference_build": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chromosome": {
+      "type": "string",
+      "minLength": 1
+    },
+    "start": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Reported start or unavailable."
+    },
+    "end": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Reported end or unavailable."
+    },
+    "coordinate_convention": {
+      "enum": [
+        "zero_based_half_open",
+        "one_based_closed",
+        "inter_base"
+      ]
+    },
+    "reported_motif": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Exact caller motif text or unavailable."
+    },
+    "reported_motif_chain": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {}
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Structured caller motif chain; never flattened."
+    },
+    "reported_repeat_count": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Exact textual value is preferred for lossless decimal serialization."
+    },
+    "reported_repeat_length_bp": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Exact textual value is preferred for lossless decimal serialization."
+    },
+    "supporting_reads": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Caller support or unavailable."
+    },
+    "total_spanning_reads": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Caller spanning read count or unavailable."
+    },
+    "quality_state": {
+      "enum": [
+        "AVAILABLE",
+        "NOT_APPLICABLE",
+        "INPUT_MISSING",
+        "COMPUTATION_FAILED",
+        "AMBIGUOUS",
+        "NOT_COMPUTED",
+        "UNSUPPORTED_FORMAT"
+      ]
+    },
+    "raw_fields": {
+      "type": "object",
+      "description": "Unmapped native caller fields, retaining strings, arrays, and nested structure.",
+      "additionalProperties": true
+    },
+    "normalization_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Reasons shared values are unavailable or require caution."
+    },
+    "coordinate_space": {
+      "enum": [
+        "REFERENCE_COORDINATES",
+        "PATIENT_SEQUENCE_COORDINATES",
+        "ALIGNMENT_COORDINATES",
+        "UNKNOWN_COORDINATE_SPACE"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

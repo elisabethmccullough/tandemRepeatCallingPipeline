@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_schema_version", "package_id", "valid", "validated_utc", "error_count", "warning_count", "issues", "validated_files"],
+  "properties": {
+    "record_schema_version": {"const": "1.0"}, "package_id": {"type": ["string", "null"]}, "valid": {"type": "boolean"},
+    "validated_utc": {"type": "string", "minLength": 1}, "error_count": {"type": "integer", "minimum": 0}, "warning_count": {"type": "integer", "minimum": 0},
+    "validated_files": {"type": "array", "items": {"type": "string"}},
+    "issues": {"type": "array", "items": {"type": "object", "additionalProperties": false,
+      "required": ["issue_id", "severity", "code", "message", "relative_path", "file_id", "record_id", "caller", "associated_sequence_id"],
+      "properties": {"issue_id": {"type": "string"}, "severity": {"enum": ["ERROR", "WARNING", "INFO"]}, "code": {"type": "string"}, "message": {"type": "string"},
+        "relative_path": {"type": ["string", "null"]}, "file_id": {"type": ["string", "null"]}, "record_id": {"type": ["string", "null"]}, "caller": {"type": ["string", "null"]}, "associated_sequence_id": {"type": ["string", "null"]}}}}
+  }
+}

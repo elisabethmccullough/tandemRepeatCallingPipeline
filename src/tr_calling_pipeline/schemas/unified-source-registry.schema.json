@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_schema_version",
+    "sources"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "file_id",
+          "caller",
+          "caller_version",
+          "analysis_source",
+          "path",
+          "sha256",
+          "size_bytes",
+          "media_type",
+          "producer_command_id",
+          "associated_sequence_id"
+        ],
+        "properties": {
+          "file_id": {
+            "type": "string"
+          },
+          "caller": {
+            "enum": [
+              "VAMOS",
+              "STRAGLR",
+              "TANDEM_GENOTYPES"
+            ]
+          },
+          "caller_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "analysis_source": {
+            "enum": [
+              "RAW_READS",
+              "ASSEMBLED_CONTIG"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "producer_command_id": {
+            "type": "string"
+          },
+          "associated_sequence_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
