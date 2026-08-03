@@ -42,6 +42,7 @@ class StageDefinition:
     display_name: str
     description: str
     required_input_roles: tuple[str, ...] = ()
+    optional_input_roles: tuple[str, ...] = ()
     expected_output_roles: tuple[str, ...] = ()
     required_tools: tuple[str, ...] = ()
     optional_tools: tuple[str, ...] = ()
@@ -50,13 +51,14 @@ class StageDefinition:
     resume_supported: bool = True
 
 
-def _stage(stage_id: str, order: int, inputs=(), outputs=(), required=(), optional=()) -> StageDefinition:
+def _stage(stage_id: str, order: int, inputs=(), outputs=(), required=(), optional=(), optional_inputs=()) -> StageDefinition:
     return StageDefinition(
         stage_id=stage_id,
         order=order,
         display_name=stage_id.replace("_", " ").title(),
         description=f"Scaffold workflow stage {stage_id}.",
         required_input_roles=tuple(inputs),
+        optional_input_roles=tuple(optional_inputs),
         expected_output_roles=tuple(outputs),
         required_tools=tuple(required),
         optional_tools=tuple(optional),
@@ -72,13 +74,12 @@ STAGES = (
     _stage("05_run_straglr", 5, ("PREPARED_MINI_BAM", "PREPARED_MINI_BAM_INDEX", "REFERENCE_FASTA", "REFERENCE_FASTA_INDEX", "LOCUS_CONFIG"), ("STRAGLR_NATIVE_OUTPUTS", "STRAGLR_RUN_METADATA", "STRAGLR_NORMALIZED_EVIDENCE"), optional=("STRAGLR",)),
     _stage("06_prepare_tandem_genotypes", 6, ("PACKAGE_PATIENT_FASTA", "PACKAGE_PATIENT_METADATA", "ASSEMBLY_RECORD_MAPPINGS", "REFERENCE_FASTA", "REFERENCE_FASTA_INDEX", "LOCUS_CONFIG"), ("TANDEM_GENOTYPES_ALIGNMENT_INPUTS", "TANDEM_GENOTYPES_ALIGNMENT_METADATA", "TANDEM_GENOTYPES_PREPARATION_SUMMARY"), optional=("LASTDB", "LASTAL")),
     _stage("07_run_tandem_genotypes", 7, ("TANDEM_GENOTYPES_ALIGNMENT_INPUTS", "TANDEM_GENOTYPES_ALIGNMENT_METADATA", "PACKAGE_PATIENT_METADATA", "LOCUS_CONFIG"), ("TANDEM_GENOTYPES_NATIVE_OUTPUTS", "TANDEM_GENOTYPES_RUN_METADATA", "TANDEM_GENOTYPES_NORMALIZED_EVIDENCE"), optional=("TANDEM_GENOTYPES",)),
-    _stage("08_normalize_outputs", 8, (
+    _stage("08_normalize_outputs", 8, ("PACKAGE_PATIENT_FASTA", "PACKAGE_PATIENT_METADATA", "LOCUS_CONFIG"),
+        ("UNIFIED_NORMALIZED_EVIDENCE", "UNIFIED_EVIDENCE_SUMMARY", "UNIFIED_SOURCE_REGISTRY", "UNIFIED_VALIDATION_REPORT"), ("PYTHON",), optional_inputs=(
         "VAMOS_READ_NATIVE_OUTPUTS", "VAMOS_READ_RUN_METADATA", "VAMOS_READ_NORMALIZED_EVIDENCE",
         "VAMOS_CONTIG_NATIVE_OUTPUTS", "VAMOS_CONTIG_RUN_METADATA", "VAMOS_CONTIG_NORMALIZED_EVIDENCE",
         "STRAGLR_NATIVE_OUTPUTS", "STRAGLR_RUN_METADATA", "STRAGLR_NORMALIZED_EVIDENCE",
-        "TANDEM_GENOTYPES_NATIVE_OUTPUTS", "TANDEM_GENOTYPES_RUN_METADATA", "TANDEM_GENOTYPES_NORMALIZED_EVIDENCE",
-        "PACKAGE_PATIENT_FASTA", "PACKAGE_PATIENT_METADATA", "LOCUS_CONFIG"),
-        ("UNIFIED_NORMALIZED_EVIDENCE", "UNIFIED_EVIDENCE_SUMMARY", "UNIFIED_SOURCE_REGISTRY", "UNIFIED_VALIDATION_REPORT"), ("PYTHON",)),
+        "TANDEM_GENOTYPES_NATIVE_OUTPUTS", "TANDEM_GENOTYPES_RUN_METADATA", "TANDEM_GENOTYPES_NORMALIZED_EVIDENCE")),
     _stage("09_build_case_package", 9, ("NORMALIZED_EVIDENCE", "ASSEMBLY_FASTA"), ("CASE_PACKAGE",), ("PIPELINE",)),
     _stage("10_validate_case_package", 10, ("CASE_PACKAGE",), ("VALIDATED_CASE_PACKAGE",), ("PIPELINE",)),
 )

@@ -311,16 +311,61 @@ def write_normalization_outputs(output_directory: Path, documents: tuple[Mapping
     return {name: output_directory / name for name in names}
 
 
-def run_normalization_stage(config: Mapping[str, Any], root: Path, *, overwrite: bool = False) -> dict[str, Path]:
-    run = config["run"]
+def _normalization_groups(root: Path) -> list[dict[str, Any]]:
+    """Return the single authoritative Stage 08 artifact discovery plan."""
     specs = (
         ("VAMOS", "RAW_READS", "04_vamos_read", "vamos-read.normalized.json", "vamos-read.outputs.json", "vamos-read.run.json"),
         ("VAMOS", "ASSEMBLED_CONTIG", "05_vamos_contig", "stage-normalized.json", "stage-outputs.json", "stage-summary.json"),
         ("STRAGLR", "RAW_READS", "06_straglr", "straglr.normalized.json", "straglr.outputs.json", "straglr.run.json"),
         ("TANDEM_GENOTYPES", "ASSEMBLED_CONTIG", "08_tandem_genotypes", "stage-normalized.json", "stage-outputs.json", "stage-summary.json"),
     )
-    groups = [{"caller": c, "analysis_source": s, "normalized": root / d / n,
-               "registry": root / d / o, "run_metadata": root / d / m} for c, s, d, n, o, m in specs]
+    return [{"caller": caller, "analysis_source": source, "normalized": root / directory / normalized,
+             "registry": root / directory / registry, "run_metadata": root / directory / metadata}
+            for caller, source, directory, normalized, registry, metadata in specs]
+
+
+def _dry_run_plan(config: Mapping[str, Any], root: Path, groups: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    required = {
+        "PACKAGE_PATIENT_FASTA": root / "03_assembly_alignment" / "patient-sequences.fasta",
+        "PACKAGE_PATIENT_METADATA": root / "03_assembly_alignment" / "patient-sequences.metadata.json",
+        "LOCUS_CONFIG": Path(str(config["locus_config"])),
+    }
+    group_status = []
+    for group in groups:
+        artifacts = {key: {"path": str(group[key]), "exists": Path(group[key]).is_file()}
+                     for key in ("normalized", "registry", "run_metadata")}
+        count = sum(item["exists"] for item in artifacts.values())
+        group_status.append({"caller": group["caller"], "analysis_source": group["analysis_source"],
+                             "status": "PRESENT" if count == 3 else ("ABSENT" if count == 0 else "INCOMPLETE"),
+                             "artifacts": artifacts})
+    required_status = [{"role": role, "path": str(path), "exists": path.is_file()} for role, path in required.items()]
+    return {"record_schema_version": SCHEMA_VERSION, "report_type": "STAGE_08_DRY_RUN_PLAN",
+            "normalization_performed": False, "required_inputs": required_status,
+            "caller_artifact_groups": group_status,
+            "valid_for_execution": all(item["exists"] for item in required_status) and
+                                   all(item["status"] != "INCOMPLETE" for item in group_status),
+            "warnings": ["Optional absent caller groups will be represented as NOT_COMPUTED during execution."],
+            "errors": ([f'Missing required input: {item["role"]}' for item in required_status if not item["exists"]] +
+                       [f'Incomplete caller artifact group: {item["caller"]}/{item["analysis_source"]}' for item in group_status if item["status"] == "INCOMPLETE"])}
+
+
+def run_normalization_stage(config: Mapping[str, Any], root: Path, *, overwrite: bool = False,
+                            dry_run: bool = False) -> dict[str, Path]:
+    run = config["run"]
+    groups = _normalization_groups(root)
+    if dry_run:
+        plan = _dry_run_plan(config, root, groups)
+        plan_directory = root / "09_normalized_evidence_plans"
+        plan_directory.mkdir(parents=True, exist_ok=True)
+        path = plan_directory / "dry-run-validation-report.json"
+        atomic_write_json(path, plan)
+        return {"dry-run-validation-report.json": path}
+    required_paths = (root / "03_assembly_alignment" / "patient-sequences.metadata.json",
+                      root / "03_assembly_alignment" / "patient-sequences.fasta",
+                      Path(str(config["locus_config"])))
+    missing_required = [str(path) for path in required_paths if not path.is_file()]
+    if missing_required:
+        raise FileNotFoundError(f"required Stage 08 input is missing: {', '.join(missing_required)}")
     try:
         documents = normalize_caller_artifacts(case_id=run["case_id"], subject_id=run["subject_id"], sample_id=run["sample_id"],
             locus_id=run["locus_id"], patient_metadata_path=root / "03_assembly_alignment" / "patient-sequences.metadata.json",
@@ -329,11 +374,12 @@ def run_normalization_stage(config: Mapping[str, Any], root: Path, *, overwrite:
         # A report is diagnostic, not a biological package. Publish only that
         # report on failure; no normalized package, summary, or registry can be
         # mistaken for a successful partial result.
-        failed = root / "09_normalized_evidence"
-        if failed.exists() and not overwrite:
-            raise
-        if failed.exists(): shutil.rmtree(failed)
-        failed.mkdir(parents=True)
-        atomic_write_json(failed / "validation-report.json", exc.report)
+        failures = root / "09_normalized_evidence_failures"
+        failures.mkdir(parents=True, exist_ok=True)
+        failure_id = f"failure-{utc_now().replace(':', '').replace('-', '')}-{uuid.uuid4().hex[:8]}"
+        work = failures / f".work-{uuid.uuid4()}"
+        work.mkdir()
+        atomic_write_json(work / "validation-report.json", exc.report)
+        os.replace(work, failures / failure_id)
         raise
     return write_normalization_outputs(root / "09_normalized_evidence", documents, overwrite=overwrite)

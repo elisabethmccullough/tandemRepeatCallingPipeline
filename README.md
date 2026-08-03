@@ -274,6 +274,14 @@ tr-pipeline run \
   --stop-stage 08_normalize_outputs
 ```
 
+Dry-run inspects required patient inputs and classifies each optional caller
+artifact group as present, absent, or incomplete. It writes only
+`09_normalized_evidence_plans/dry-run-validation-report.json`; it does not
+publish a normalized evidence package or completed source registry. Validation
+failures during a real rerun are published atomically beneath
+`09_normalized_evidence_failures/` and never replace a previously completed
+package.
+
 VAMOS and STRaglr read evidence stays `RAW_READS` / `UNASSIGNED`; VAMOS
 contig and tandem-genotypes evidence stays `ASSEMBLED_CONTIG` /
 `DIRECT_SEQUENCE_ASSOCIATION`. Caller states include `AVAILABLE`,

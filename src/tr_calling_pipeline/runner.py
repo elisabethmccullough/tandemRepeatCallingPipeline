@@ -242,6 +242,8 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
         prior = json.loads(record_path.read_text(encoding="utf-8")) if record_path.is_file() else None
         digest = _stage_digest(stage, config, execution_mode)
         input_paths = tuple(path for role in stage.required_input_roles for path in role_paths.get(role, ()))
+        optional_input_paths = tuple(path for role in stage.optional_input_roles for path in role_paths.get(role, ()) if path.is_file())
+        input_paths = (*input_paths, *optional_input_paths)
         if stage.stage_id == "05_run_straglr":
             # The catalog is an explicit locus resource rather than a filename-
             # inferred role. Its bytes therefore participate directly in resume.
@@ -323,7 +325,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
-        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7):
+        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7, 8):
             if stage.order == 5:
                 from .callers.straglr import run_straglr_stage
                 run_straglr_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
@@ -333,9 +335,12 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             elif stage.order == 6:
                 from .last_alignment import prepare_tandem_genotypes_stage
                 prepare_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
-            else:
+            elif stage.order == 7:
                 from .callers.tandem_genotypes import run_tandem_genotypes_stage
                 run_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
+            else:
+                from .normalization import run_normalization_stage
+                run_normalization_stage(config, root, overwrite=overwrite, dry_run=True)
         if implemented and not dry_run:
             record["status"] = StageStatus.RUNNING.value
             record["completed_utc"] = None

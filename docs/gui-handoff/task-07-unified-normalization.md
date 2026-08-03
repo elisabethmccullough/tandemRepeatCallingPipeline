@@ -36,3 +36,7 @@ missing/failed-caller states, provisional-adapter and unverified-coordinate
 warnings, and source/version provenance. Availability summaries are inventory
 only and never claim agreement or disagreement.
 
+Stage 08 dry-run writes a planning report outside the completed package. Failed
+validation reports likewise use a separate failure directory, so the GUI must
+only treat the complete four-file `09_normalized_evidence` directory as a
+successfully published package.
