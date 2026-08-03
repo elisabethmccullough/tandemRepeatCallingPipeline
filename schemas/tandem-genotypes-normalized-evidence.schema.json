@@ -1,16 +1,114 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/tandem-genotypes-normalized-evidence.schema.json",
+  "title": "tandem-genotypes-normalized-evidence",
   "schema_version": "1.0",
   "type": "object",
   "required": [
-    "record_schema_version"
+    "record_schema_version",
+    "evidence_state",
+    "records",
+    "normalization_warnings"
   ],
   "properties": {
     "record_schema_version": {
       "const": "1.0"
+    },
+    "evidence_state": {
+      "enum": [
+        "AVAILABLE",
+        "NOT_COMPUTED",
+        "UNSUPPORTED_FORMAT",
+        "INPUT_MISSING"
+      ]
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "record_schema_version",
+          "record_id",
+          "caller",
+          "analysis_source",
+          "source_file_id",
+          "source_file_sha256",
+          "native_record_identifier",
+          "native_allele_identifier",
+          "associated_sequence_id",
+          "assignment_state",
+          "coordinate_space",
+          "raw_fields",
+          "normalization_warnings"
+        ],
+        "properties": {
+          "record_schema_version": {
+            "const": "1.0"
+          },
+          "record_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "caller": {
+            "const": "TANDEM_GENOTYPES"
+          },
+          "caller_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "analysis_source": {
+            "const": "ASSEMBLED_CONTIG"
+          },
+          "source_file_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "source_file_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "native_record_identifier": {
+            "type": "string"
+          },
+          "native_allele_identifier": {
+            "type": "string"
+          },
+          "associated_sequence_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "assignment_state": {
+            "const": "DIRECT_SEQUENCE_ASSOCIATION"
+          },
+          "coordinate_space": {
+            "enum": [
+              "REFERENCE_COORDINATES",
+              "PATIENT_SEQUENCE_COORDINATES",
+              "ALIGNMENT_COORDINATES",
+              "UNKNOWN_COORDINATE_SPACE"
+            ]
+          },
+          "raw_fields": {
+            "type": "object"
+          },
+          "normalization_warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "normalization_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
-  "additionalProperties": true,
-  "$id": "https://umn.example/schemas/tandem-genotypes-normalized-evidence.schema.json",
-  "title": "Tandem Genotypes Normalized Evidence"
+  "additionalProperties": false
 }

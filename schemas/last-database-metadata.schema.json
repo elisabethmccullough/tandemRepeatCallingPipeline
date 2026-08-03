@@ -1,16 +1,140 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/last-database-metadata.schema.json",
+  "title": "last-database-metadata",
   "schema_version": "1.0",
   "type": "object",
   "required": [
-    "record_schema_version"
+    "record_schema_version",
+    "stage_id",
+    "sequence_id",
+    "source_fasta_record_id",
+    "sequence_sha256",
+    "status",
+    "lastdb_version",
+    "database_file_ids",
+    "repeat_definition_identity",
+    "command_record_paths",
+    "warnings",
+    "failure"
   ],
   "properties": {
     "record_schema_version": {
       "const": "1.0"
+    },
+    "stage_id": {
+      "enum": [
+        "06_prepare_tandem_genotypes"
+      ]
+    },
+    "sequence_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "source_fasta_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sequence_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {
+      "enum": [
+        "PLANNED",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+        "DRY_RUN",
+        "TOOL_MISSING",
+        "INPUT_MISSING",
+        "UNSUPPORTED_VERSION",
+        "UNSUPPORTED_FORMAT"
+      ]
+    },
+    "lastdb_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lastal_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "repeat_definition_identity": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "command_record_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failure": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "database_file_ids": {
+      "type": "array",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "required": [
+          "path",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
     }
   },
-  "additionalProperties": true,
-  "$id": "https://umn.example/schemas/last-database-metadata.schema.json",
-  "title": "Last Database Metadata"
+  "additionalProperties": false
 }

@@ -63,8 +63,12 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
         "STRAGLR_NATIVE_OUTPUTS": (root / "06_straglr" / "straglr.outputs.json",),
         "STRAGLR_RUN_METADATA": (root / "06_straglr" / "straglr.run.json",),
         "STRAGLR_NORMALIZED_EVIDENCE": (root / "06_straglr" / "straglr.normalized.json",),
-        "TANDEM_GENOTYPES_ALIGNMENT_INPUT": (root / "07_tandem_genotypes" / "alignment.maf",),
-        "TANDEM_GENOTYPES_NATIVE_OUTPUT": (root / "07_tandem_genotypes" / "tandem_genotypes.txt",),
+        "TANDEM_GENOTYPES_ALIGNMENT_INPUTS": (root / "07_tandem_genotypes_preparation" / "alignment-inputs.json",),
+        "TANDEM_GENOTYPES_ALIGNMENT_METADATA": (root / "07_tandem_genotypes_preparation" / "alignment-metadata.json",),
+        "TANDEM_GENOTYPES_PREPARATION_SUMMARY": (root / "07_tandem_genotypes_preparation" / "preparation-summary.json",),
+        "TANDEM_GENOTYPES_NATIVE_OUTPUTS": (root / "08_tandem_genotypes" / "stage-outputs.json",),
+        "TANDEM_GENOTYPES_RUN_METADATA": (root / "08_tandem_genotypes" / "stage-summary.json",),
+        "TANDEM_GENOTYPES_NORMALIZED_EVIDENCE": (root / "08_tandem_genotypes" / "stage-normalized.json",),
         "NATIVE_CALLER_OUTPUTS": (
             root / "04_vamos_read" / "vamos_read.vcf.gz",
             root / "05_vamos_contig" / "vamos_contig.vcf.gz",
@@ -129,7 +133,12 @@ def _tool_identities(
         if mode is ExecutionMode.NATIVE:
             tool = resolve_tool(tool, config_directory)
             if tool.resolved_executable:
-                tool = detect_version(tool)
+                if tool_id in {"LASTDB", "LASTAL"}:
+                    tool = detect_version(tool, pattern=r"(?i)(?:last(?:db|al)?[^0-9]*)?([0-9]{3,5})")
+                elif tool_id == "TANDEM_GENOTYPES":
+                    tool = detect_version(tool, pattern=r"(?i)(?:tandem-genotypes[^0-9]*)?v?([0-9]+(?:\.[0-9]+)+)")
+                else:
+                    tool = detect_version(tool)
             identity = tool.to_dict()
         else:
             identity = tool.to_dict()
@@ -190,6 +199,12 @@ def _execute_implemented_stage(stage: StageDefinition, config: dict[str, Any], r
     elif stage.stage_id == "05_run_straglr":
         from .callers.straglr import run_straglr_stage
         run_straglr_stage(config, root, config_directory, overwrite=overwrite)
+    elif stage.stage_id == "06_prepare_tandem_genotypes":
+        from .last_alignment import prepare_tandem_genotypes_stage
+        prepare_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite)
+    elif stage.stage_id == "07_run_tandem_genotypes":
+        from .callers.tandem_genotypes import run_tandem_genotypes_stage
+        run_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite)
 
 
 def _archive_invalidated(path: Path, prior: dict[str, Any], reason: ResumeReason) -> None:
@@ -227,6 +242,16 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             catalog = _catalog(config)
             if catalog is not None:
                 input_paths = (*input_paths, catalog)
+        if stage.stage_id in {"06_prepare_tandem_genotypes", "07_run_tandem_genotypes"}:
+            from .last_alignment import _resource
+            repeat = _resource(config)
+            if repeat is not None:
+                input_paths = (*input_paths, repeat)
+        if stage.stage_id == "07_run_tandem_genotypes":
+            registry_path = root / "07_tandem_genotypes_preparation" / "alignment-inputs.json"
+            if registry_path.is_file():
+                registry = json.loads(registry_path.read_text(encoding="utf-8"))
+                input_paths = (*input_paths, *(Path(item["path"]) for item in registry.get("alignments", [])))
         output_paths = tuple(path for role in stage.expected_output_roles for path in role_paths.get(role, ()))
         inputs = _identities(input_paths)
         prior_output_paths = tuple(Path(str(item["path"])) for item in (prior or {}).get("output_file_identities", []))
@@ -262,7 +287,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
 
         now = utc_now()
         effective_modes = sorted({str(tool["execution_mode"]) for tool in tools})
-        implemented = stage.order <= 5
+        implemented = stage.order <= 7
         status = StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value
         warnings = (["Dry run: biological outputs and external commands were not created."] if dry_run and implemented else
             (["Caller-specific execution is deferred; this record describes scaffold planning only."] if not implemented else []))
@@ -285,13 +310,19 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
-        if implemented and dry_run and stage.order in (3, 4, 5):
+        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7):
             if stage.order == 5:
                 from .callers.straglr import run_straglr_stage
                 run_straglr_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
-            else:
+            elif stage.order in (3, 4):
                 from .callers.vamos import run_vamos_stage
                 run_vamos_stage(stage.stage_id, config, root, config_directory, overwrite=overwrite, dry_run=True)
+            elif stage.order == 6:
+                from .last_alignment import prepare_tandem_genotypes_stage
+                prepare_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
+            else:
+                from .callers.tandem_genotypes import run_tandem_genotypes_stage
+                run_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
         if implemented and not dry_run:
             record["status"] = StageStatus.RUNNING.value
             record["completed_utc"] = None
@@ -306,8 +337,15 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
                 if stage.stage_id == "05_run_straglr":
                     registry = json.loads((root / "06_straglr" / "straglr.outputs.json").read_text(encoding="utf-8"))
                     completed_output_paths = (*output_paths, *(Path(item["path"]) for item in registry["outputs"]))
+                elif stage.stage_id == "06_prepare_tandem_genotypes":
+                    registry=json.loads((root/"07_tandem_genotypes_preparation"/"alignment-inputs.json").read_text())
+                    metadata=json.loads((root/"07_tandem_genotypes_preparation"/"alignment-metadata.json").read_text())
+                    completed_output_paths=(*output_paths,*(Path(item["path"]) for item in registry["alignments"]),*(Path(db["path"]) for item in metadata["records"] for db in item.get("database_file_ids",[])))
+                elif stage.stage_id == "07_run_tandem_genotypes":
+                    registry=json.loads((root/"08_tandem_genotypes"/"stage-outputs.json").read_text())
+                    completed_output_paths=(*output_paths,*(Path(item["path"]) for item in registry["outputs"]))
                 record["output_file_identities"] = _identities(completed_output_paths)
-                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig", 5: root / "06_straglr"}.get(stage.order)
+                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig", 5: root / "06_straglr", 6:root/"07_tandem_genotypes_preparation",7:root/"08_tandem_genotypes"}.get(stage.order)
                 record["command_record_paths"] = [str(path) for path in sorted(execution_root.glob("**/execution-records/*.json"))] if execution_root else []
                 record["completed_utc"] = utc_now()
             except Exception as exc:

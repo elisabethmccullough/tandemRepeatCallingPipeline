@@ -5,13 +5,18 @@ one provisional adapter and is never selected without explicit opt-in.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 import re
+import json, os, shutil
+from uuid import uuid4
 
 from .provenance import sha256_file
 from .tools import Tool, ToolId, detect_version, resolve_tool
+from .execution import CommandSpec, InputDeclaration, OutputDeclaration, execute
+from .provenance import atomic_write_json, file_identity, utc_now
+from .config import load_locus_config
 
 
 class LastVersionClassification(str, Enum):
@@ -96,3 +101,65 @@ def validate_maf(path: str | Path, expected_query_id: str) -> tuple[str, ...]:
     identifiers = tuple(line.split()[1] for line in lines if line.startswith("s ") and len(line.split()) >= 7)
     if expected_query_id not in identifiers: raise UnsupportedLastAlignment("expected patient sequence is absent from MAF")
     return identifiers
+
+def _fasta(path: Path) -> dict[str, str]:
+    records={}; name=None; chunks=[]
+    for line in path.read_text(encoding="ascii").splitlines():
+        if line.startswith(">"):
+            if name is not None: records[name]="".join(chunks)
+            name=line[1:].split()[0]; chunks=[]
+        elif name is None: raise ValueError("FASTA sequence precedes header")
+        else: chunks.append(line)
+    if name is not None: records[name]="".join(chunks)
+    return records
+
+def _resource(config):
+    locus=Path(config["locus_config"]); value=load_locus_config(locus)["caller_resources"]["tandem_genotypes"]["repeat_definition"]
+    if value is None: return None
+    p=Path(value).expanduser(); return p if p.is_absolute() else (locus.parent/p).resolve()
+
+def prepare_tandem_genotypes_stage(config, root: Path, config_directory: Path, *, overwrite=False, dry_run=False):
+    """Prepare one isolated LAST database and MAF per authoritative sequence."""
+    out=root/"07_tandem_genotypes_preparation"; out.mkdir(parents=True,exist_ok=True)
+    summary_path=out/"preparation-summary.json"; align_registry=out/"alignment-inputs.json"; metadata_registry=out/"alignment-metadata.json"
+    settings=load_locus_config(config["locus_config"])["caller_resources"]["tandem_genotypes"]
+    tools=[]
+    for tid,key in ((ToolId.LASTDB,"lastdb"),(ToolId.LASTAL,"lastal")):
+        tc=config.get("tools",{}).get(key,{}); tools.append(detect_last(tc.get("executable",key),config_directory,tc.get("required",False),tid))
+    repeat=_resource(config); status="DRY_RUN" if dry_run else None; warning=None
+    if repeat is None or not repeat.is_file(): status="INPUT_MISSING"; warning="explicit repeat definition is missing"
+    elif any(not t.resolved_executable for t in tools): status="TOOL_MISSING"; warning="configured LAST executable is unavailable"
+    adapters=[]
+    if status is None:
+        try: adapters=[select_adapter(t.detected_version,allow_provisional=settings["allow_provisional_last_adapter"]) for t in tools]
+        except UnsupportedLastVersion as exc: status="UNSUPPORTED_VERSION"; warning=str(exc)
+    records=[]
+    if status:
+        for m in json.loads((root/"03_assembly_alignment"/"patient-sequences.metadata.json").read_text()).get("sequences",[]):
+            records.append({"record_schema_version":"1.0","preparation_id":f"last-{m['sequence_id']}","stage_id":"06_prepare_tandem_genotypes","sequence_id":m["sequence_id"],"source_fasta_record_id":m["source_fasta_record_id"],"sequence_sha256":m["sequence_sha256"],"status":status,"lastdb_version":tools[0].detected_version,"lastal_version":tools[1].detected_version,"input_file_ids":[],"database_file_ids":[],"alignment_file_id":None,"alignment_file_sha256":None,"alignment_path":"","alignment_format":None,"coordinate_space":"UNKNOWN_COORDINATE_SPACE","repeat_definition_identity":asdict(file_identity(repeat)) if repeat and repeat.is_file() else None,"command_record_paths":[],"started_utc":utc_now(),"completed_utc":utc_now(),"warnings":[warning] if warning else [],"failure":None})
+        atomic_write_json(align_registry,{"record_schema_version":"1.0","alignments":[]}); atomic_write_json(metadata_registry,{"record_schema_version":"1.0","records":records}); atomic_write_json(summary_path,{"record_schema_version":"1.0","stage_id":"06_prepare_tandem_genotypes","status":status,"preparations":records,"warnings":[warning] if warning else [],"failure":None})
+        if not dry_run and any(t.required for t in tools): raise RuntimeError(warning)
+        return records
+    fasta=root/"03_assembly_alignment"/"patient-sequences.fasta"; metadata_path=root/"03_assembly_alignment"/"patient-sequences.metadata.json"
+    sequences=_fasta(fasta); metadata=json.loads(metadata_path.read_text())["sequences"]
+    for m in metadata:
+        seqid=m["sequence_id"]; seq=sequences.get(seqid)
+        if seq is None or __import__('hashlib').sha256(seq.encode('ascii')).hexdigest()!=m["sequence_sha256"]: raise ValueError(f"patient sequence checksum mismatch: {seqid}")
+        final=out/seqid
+        if final.exists() and not overwrite: raise FileExistsError(f"preparation exists: {final}")
+        work=out/f".{seqid}-work-{uuid4()}"; (work/"input").mkdir(parents=True); (work/"lastdb").mkdir(); (work/"alignment").mkdir(); (work/"execution-records").mkdir()
+        input_fasta=work/"input"/f"{seqid}.fasta"; input_sha=write_single_record_fasta(input_fasta,seqid,seq)
+        prefix=work/"lastdb"/"database"; dbplan=adapters[0].lastdb_plan(tools[0].resolved_executable,prefix,input_fasta,settings["lastdb_additional_arguments"])
+        dbrec=work/"execution-records"/"lastdb.json"; execute(CommandSpec(f"lastdb-{seqid}","06_prepare_tandem_genotypes","LASTDB",dbplan.argv,str(work.resolve()),declared_inputs=(InputDeclaration("patient-fasta",str(input_fasta)),),overwrite=True),tools[0],dbrec,work/"logs")
+        dbfiles=sorted(p for p in (work/"lastdb").iterdir() if p.is_file())
+        if not dbfiles or not any(p.suffix in adapters[0].capabilities.database_signature_suffixes for p in dbfiles): raise RuntimeError("LASTDB signature output missing")
+        alignment=work/"alignment"/f"{seqid}.maf"; alplan=adapters[1].lastal_plan(tools[1].resolved_executable,prefix,Path(config["inputs"]["reference_fasta"]),alignment,settings["lastal_additional_arguments"])
+        alrec=work/"execution-records"/"lastal.json"; execute(CommandSpec(f"lastal-{seqid}","06_prepare_tandem_genotypes","LASTAL",alplan.argv,str(work.resolve()),declared_inputs=(InputDeclaration("database-signature",str(dbfiles[0])),InputDeclaration("reference",config["inputs"]["reference_fasta"])),overwrite=True),tools[1],alrec,work/"logs")
+        stdout=work/"logs"/"06_prepare_tandem_genotypes"/f"lastal-{seqid}.stdout.log"; shutil.copyfile(stdout,alignment); validate_maf(alignment,seqid)
+        old=out/f".{seqid}-old-{uuid4()}";
+        if final.exists(): os.replace(final,old)
+        os.replace(work,final)
+        if old.exists(): shutil.rmtree(old)
+        dbfiles=sorted((final/"lastdb").iterdir()); alignment=final/"alignment"/f"{seqid}.maf"
+        rec={"record_schema_version":"1.0","preparation_id":f"last-{seqid}","stage_id":"06_prepare_tandem_genotypes","sequence_id":seqid,"source_fasta_record_id":m["source_fasta_record_id"],"sequence_sha256":m["sequence_sha256"],"input_fasta_sha256":input_sha,"status":"SUCCEEDED","lastdb_version":tools[0].detected_version,"lastal_version":tools[1].detected_version,"input_file_ids":[asdict(file_identity(fasta)),asdict(file_identity(metadata_path))],"database_file_ids":[asdict(file_identity(p)) for p in dbfiles],"alignment_file_id":f"last-alignment-{seqid}","alignment_file_sha256":sha256_file(alignment),"alignment_path":str(alignment),"alignment_format":"MAF","coordinate_space":"ALIGNMENT_COORDINATES","repeat_definition_identity":asdict(file_identity(repeat)),"command_record_paths":[str(final/"execution-records"/"lastdb.json"),str(final/"execution-records"/"lastal.json")],"started_utc":utc_now(),"completed_utc":utc_now(),"warnings":["provisional LAST adapter"],"failure":None}; atomic_write_json(final/"alignment.metadata.json",rec); records.append(rec)
+    atomic_write_json(align_registry,{"record_schema_version":"1.0","alignments":[{"sequence_id":r["sequence_id"],"path":r["alignment_path"],"sha256":r["alignment_file_sha256"]} for r in records]}); atomic_write_json(metadata_registry,{"record_schema_version":"1.0","records":records}); atomic_write_json(summary_path,{"record_schema_version":"1.0","stage_id":"06_prepare_tandem_genotypes","status":"SUCCEEDED","preparations":records,"warnings":[],"failure":None}); return records
