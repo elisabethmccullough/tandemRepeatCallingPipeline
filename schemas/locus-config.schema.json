@@ -130,9 +130,7 @@
       "properties": {
         "vamos": {
           "type": "object",
-          "required": [
-            "repeat_catalog"
-          ],
+          "anyOf": [{"required": ["repeat_catalog"]}, {"required": ["read_catalog", "contig_catalog"]}],
           "properties": {
             "repeat_catalog": {
               "type": [
@@ -140,7 +138,9 @@
                 "null"
               ],
               "description": "Resource path or explicit unavailable value."
-            }
+            },
+            "read_catalog": {"type": ["string", "null"], "description": "Read-mode catalog resolved relative to this locus configuration."},
+            "contig_catalog": {"type": ["string", "null"], "description": "Contig-mode catalog resolved relative to this locus configuration."}
           },
           "additionalProperties": false
         },

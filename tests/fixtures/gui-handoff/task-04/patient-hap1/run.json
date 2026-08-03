@@ -1,0 +1,29 @@
+{
+  "record_schema_version": "1.0",
+  "run_id": "fixture-patient-hap1",
+  "stage_id": "04_run_vamos_contig",
+  "caller": "VAMOS",
+  "caller_version": "2.1.0",
+  "raw_version_output": "VAMOS 2.1.0\n",
+  "analysis_source": "ASSEMBLED_CONTIG",
+  "associated_sequence_id": "patient-hap1",
+  "source_fasta_record_id": "PATIENT-HAP1",
+  "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+  "status": "SUCCEEDED",
+  "command_record_paths": [
+    "execution-records/command.json"
+  ],
+  "input_file_ids": [
+    "fixture-input"
+  ],
+  "native_output_file_ids": [
+    "fixture-native"
+  ],
+  "catalog_identity": {
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "started_utc": "2026-01-01T00:00:00Z",
+  "completed_utc": "2026-01-01T00:00:01Z",
+  "warnings": [],
+  "failure": null
+}
