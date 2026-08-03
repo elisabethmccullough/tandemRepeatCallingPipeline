@@ -1,0 +1,2 @@
+record_id	locus_id	chromosome	start	end	allele_id	repeat_unit	repeat_count
+synthetic-record-1	SYNTH_LOCUS	chrSynthetic	0	3	allele-1	CAG	1

@@ -1,0 +1,17 @@
+{
+  "outputs": [
+    {
+      "analysis_source": "RAW_READS",
+      "caller": "STRAGLR",
+      "caller_version": "1.5.0",
+      "file_id": "straglr-native-1",
+      "media_type": "text/tab-separated-values",
+      "path": "tests/fixtures/gui-handoff/task-05/native/two-alleles.native.tsv",
+      "producer_command_id": "straglr-read",
+      "role": "NATIVE_CALLER_OUTPUT",
+      "sha256": "02dff5f6363251489c3f4f607619e280a0277a3c59faed11c144921dac3f1823",
+      "size_bytes": 302
+    }
+  ],
+  "record_schema_version": "1.0"
+}

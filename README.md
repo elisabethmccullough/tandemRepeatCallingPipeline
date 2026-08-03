@@ -178,3 +178,32 @@ Read-derived alleles remain `UNASSIGNED`; allele order is never mapped to patien
 tr-pipeline run --config config/example.yaml --start-stage 03_run_vamos_read --stop-stage 04_run_vamos_contig
 tr-pipeline run --config config/example.yaml --dry-run --start-stage 03_run_vamos_read --stop-stage 04_run_vamos_contig
 ```
+
+## STRaglr stage (development contract)
+
+Stage `05_run_straglr` consumes the prepared coordinate-sorted mini-BAM and index,
+configured reference FASTA and index, and the explicit `caller_resources.straglr.repeat_catalog`
+path from the locus YAML. It never searches for or creates a catalog. Configure the
+executable under `tools.straglr`; `required: false` records missing tools without
+failing the pipeline, while `required: true` fails after preserving metadata.
+
+No real STRaglr release is currently laboratory verified. The isolated provisional
+1.x adapter is disabled by default and requires `allow_provisional_adapter: true`;
+unknown, undetermined, and unsupported versions are never executed with guessed
+flags. `additional_arguments` is an argv string list. Its positional syntax and
+frozen synthetic TSV layout still require verification against the laboratory
+installation.
+
+All files emitted in the run's `06_straglr/native/` directory are preserved byte for
+byte and registered with SHA-256, size, caller version, and command provenance.
+Normalization preserves every TSV value as text in `raw_fields`. Evidence uses
+`RAW_READS`, remains `UNASSIGNED`, and is never linked to HAP1/HAP2. STRaglr does
+not replace patient sequences, values are not reconciled with VAMOS, and no clinical
+interpretation is performed. Unsupported native layouts remain registered while
+normalization reports `UNSUPPORTED_FORMAT`. Resume includes input, catalog, tool
+version, adapter setting, additional arguments, and native output identities.
+
+```bash
+tr-pipeline run --config config/example.yaml --start-stage 05_run_straglr --stop-stage 05_run_straglr
+tr-pipeline run --config config/example.yaml --dry-run --start-stage 05_run_straglr --stop-stage 05_run_straglr
+```

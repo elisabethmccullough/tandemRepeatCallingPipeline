@@ -124,7 +124,7 @@ def _run_one(config, stage_id, mode, input_path, out, tool, catalog, *, sequence
     metadata["input_file_ids"]=[f"input-{sha256_file(item.path)[:16]}" for item in declared_inputs]
     try:
         execute(spec,tool,record_path,out/"logs",dry_run=False)
-        outputs=[NativeCallerOutput.from_path(p,file_id=f"{plan.command_id}-native-{i+1}",caller_version=tool.detected_version,analysis_source=source,producer_command_id=plan.command_id) for i,p in enumerate(plan.native_outputs)]
+        outputs=[NativeCallerOutput.from_path(p,file_id=f"{plan.command_id}-native-{i+1}",caller="VAMOS",caller_version=tool.detected_version,analysis_source=source,producer_command_id=plan.command_id) for i,p in enumerate(plan.native_outputs)]
         normalized=[]; warnings=[development_warning]
         try:
             for item in parse_native_jsonl(Path(plan.native_outputs[0])): normalized.append(_normalized(item,config=config,version=tool.detected_version,source=outputs[0],analysis_source=source,sequence_id=sequence_id))
