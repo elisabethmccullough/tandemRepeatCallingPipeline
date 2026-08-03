@@ -60,7 +60,9 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
         "VAMOS_CONTIG_NATIVE_OUTPUTS": (root / "05_vamos_contig" / "stage-outputs.json",),
         "VAMOS_CONTIG_RUN_METADATA": (root / "05_vamos_contig" / "stage-summary.json",),
         "VAMOS_CONTIG_NORMALIZED_EVIDENCE": (root / "05_vamos_contig" / "stage-normalized.json",),
-        "STRAGLR_NATIVE_OUTPUT": (root / "06_straglr" / "straglr.tsv",),
+        "STRAGLR_NATIVE_OUTPUTS": (root / "06_straglr" / "straglr.outputs.json",),
+        "STRAGLR_RUN_METADATA": (root / "06_straglr" / "straglr.run.json",),
+        "STRAGLR_NORMALIZED_EVIDENCE": (root / "06_straglr" / "straglr.normalized.json",),
         "TANDEM_GENOTYPES_ALIGNMENT_INPUT": (root / "07_tandem_genotypes" / "alignment.maf",),
         "TANDEM_GENOTYPES_NATIVE_OUTPUT": (root / "07_tandem_genotypes" / "tandem_genotypes.txt",),
         "NATIVE_CALLER_OUTPUTS": (
@@ -185,6 +187,9 @@ def _execute_implemented_stage(stage: StageDefinition, config: dict[str, Any], r
     elif stage.stage_id in {"03_run_vamos_read", "04_run_vamos_contig"}:
         from .callers.vamos import run_vamos_stage
         run_vamos_stage(stage.stage_id, config, root, config_directory, overwrite=overwrite)
+    elif stage.stage_id == "05_run_straglr":
+        from .callers.straglr import run_straglr_stage
+        run_straglr_stage(config, root, config_directory, overwrite=overwrite)
 
 
 def _archive_invalidated(path: Path, prior: dict[str, Any], reason: ResumeReason) -> None:
@@ -215,6 +220,13 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
         prior = json.loads(record_path.read_text(encoding="utf-8")) if record_path.is_file() else None
         digest = _stage_digest(stage, config, execution_mode)
         input_paths = tuple(path for role in stage.required_input_roles for path in role_paths.get(role, ()))
+        if stage.stage_id == "05_run_straglr":
+            # The catalog is an explicit locus resource rather than a filename-
+            # inferred role. Its bytes therefore participate directly in resume.
+            from .callers.straglr import _catalog
+            catalog = _catalog(config)
+            if catalog is not None:
+                input_paths = (*input_paths, catalog)
         output_paths = tuple(path for role in stage.expected_output_roles for path in role_paths.get(role, ()))
         inputs = _identities(input_paths)
         prior_output_paths = tuple(Path(str(item["path"])) for item in (prior or {}).get("output_file_identities", []))
@@ -250,7 +262,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
 
         now = utc_now()
         effective_modes = sorted({str(tool["execution_mode"]) for tool in tools})
-        implemented = stage.order <= 4
+        implemented = stage.order <= 5
         status = StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value
         warnings = (["Dry run: biological outputs and external commands were not created."] if dry_run and implemented else
             (["Caller-specific execution is deferred; this record describes scaffold planning only."] if not implemented else []))
@@ -273,9 +285,13 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
-        if implemented and dry_run and stage.order in (3, 4):
-            from .callers.vamos import run_vamos_stage
-            run_vamos_stage(stage.stage_id, config, root, config_directory, overwrite=overwrite, dry_run=True)
+        if implemented and dry_run and stage.order in (3, 4, 5):
+            if stage.order == 5:
+                from .callers.straglr import run_straglr_stage
+                run_straglr_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
+            else:
+                from .callers.vamos import run_vamos_stage
+                run_vamos_stage(stage.stage_id, config, root, config_directory, overwrite=overwrite, dry_run=True)
         if implemented and not dry_run:
             record["status"] = StageStatus.RUNNING.value
             record["completed_utc"] = None
@@ -286,8 +302,12 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
                 if missing:
                     raise RuntimeError(f"stage required outputs are missing or empty: {', '.join(missing)}")
                 record["status"] = StageStatus.SUCCEEDED.value
-                record["output_file_identities"] = _identities(output_paths)
-                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig"}.get(stage.order)
+                completed_output_paths = output_paths
+                if stage.stage_id == "05_run_straglr":
+                    registry = json.loads((root / "06_straglr" / "straglr.outputs.json").read_text(encoding="utf-8"))
+                    completed_output_paths = (*output_paths, *(Path(item["path"]) for item in registry["outputs"]))
+                record["output_file_identities"] = _identities(completed_output_paths)
+                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig", 5: root / "06_straglr"}.get(stage.order)
                 record["command_record_paths"] = [str(path) for path in sorted(execution_root.glob("**/execution-records/*.json"))] if execution_root else []
                 record["completed_utc"] = utc_now()
             except Exception as exc:

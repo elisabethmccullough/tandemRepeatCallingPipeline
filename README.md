@@ -178,3 +178,42 @@ Read-derived alleles remain `UNASSIGNED`; allele order is never mapped to patien
 tr-pipeline run --config config/example.yaml --start-stage 03_run_vamos_read --stop-stage 04_run_vamos_contig
 tr-pipeline run --config config/example.yaml --dry-run --start-stage 03_run_vamos_read --stop-stage 04_run_vamos_contig
 ```
+
+## STRaglr stage (development contract)
+
+Stage `05_run_straglr` consumes the prepared coordinate-sorted mini-BAM and index,
+configured reference FASTA and index, and the explicit `caller_resources.straglr.repeat_catalog`
+path from the locus YAML. It never searches for or creates a catalog. Configure the
+executable under `tools.straglr`; `required: false` records missing tools without
+failing the pipeline, while `required: true` fails after preserving metadata.
+
+STRaglr has one canonical configuration split: executable identity, requiredness,
+and execution mode are under `tools.straglr`, while the catalog, adapter opt-in,
+and caller argv extensions are under
+`caller_resources.straglr.{repeat_catalog,allow_provisional_adapter,additional_arguments}`
+in the locus configuration. The run-config schema rejects caller-resource settings
+under `tools.straglr`, so no accepted value is silently ignored.
+
+No real STRaglr release is currently laboratory verified. The isolated provisional
+1.x adapter is disabled by default and requires the locus setting
+`caller_resources.straglr.allow_provisional_adapter: true`;
+unknown, undetermined, and unsupported versions are never executed with guessed
+flags. `additional_arguments` is an argv string list. Its positional syntax and
+frozen synthetic TSV layout still require verification against the laboratory
+installation.
+
+STRaglr executes into a unique private work directory. Only files from that
+execution are atomically published to `06_straglr/native/` and registered with
+SHA-256, size, caller version, and command provenance. Without overwrite an existing
+completed native set is a conflict; with overwrite it is replaced rather than merged.
+Normalization preserves every TSV value as text in `raw_fields`. Evidence uses
+`RAW_READS`, remains `UNASSIGNED`, and is never linked to HAP1/HAP2. STRaglr does
+not replace patient sequences, values are not reconciled with VAMOS, and no clinical
+interpretation is performed. Unsupported native layouts remain registered while
+normalization reports `UNSUPPORTED_FORMAT`. Resume includes input, catalog, tool
+version, adapter setting, additional arguments, and native output identities.
+
+```bash
+tr-pipeline run --config config/example.yaml --start-stage 05_run_straglr --stop-stage 05_run_straglr
+tr-pipeline run --config config/example.yaml --dry-run --start-stage 05_run_straglr --stop-stage 05_run_straglr
+```

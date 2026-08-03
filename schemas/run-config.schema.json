@@ -105,7 +105,11 @@
           }
         },
         "reference_scope": {
-          "enum": ["WHOLE_GENOME_REFERENCE", "LOCAL_LOCUS_REFERENCE", "UNKNOWN_REFERENCE_SCOPE"]
+          "enum": [
+            "WHOLE_GENOME_REFERENCE",
+            "LOCAL_LOCUS_REFERENCE",
+            "UNKNOWN_REFERENCE_SCOPE"
+          ]
         }
       },
       "additionalProperties": false
@@ -182,9 +186,17 @@
     "assembly_alignment": {
       "type": "object",
       "properties": {
-        "minimap2_preset": {"type": "string", "minLength": 1},
-        "secondary": {"type": "boolean"},
-        "threads": {"type": "integer", "minimum": 1}
+        "minimap2_preset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secondary": {
+          "type": "boolean"
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 1
+        }
       },
       "additionalProperties": false
     },
@@ -261,7 +273,9 @@
             },
             "additional_arguments": {
               "type": "array",
-              "items": {"type": "string"},
+              "items": {
+                "type": "string"
+              },
               "default": []
             }
           },

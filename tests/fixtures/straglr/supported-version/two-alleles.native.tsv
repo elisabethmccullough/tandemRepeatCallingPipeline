@@ -1,0 +1,3 @@
+record_id	locus_id	chromosome	start	end	allele_id	repeat_unit	repeat_count	repeat_size	supporting_reads	total_spanning_reads	caller_specific
+synthetic-record-1	SYNTH_LOCUS	chrSynthetic	100	112	allele-1	CAG	004	12	3	8	0007
+synthetic-record-2	SYNTH_LOCUS	chrSynthetic	100	118	allele-2	CAG	6	18	5	8	alpha

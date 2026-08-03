@@ -22,7 +22,7 @@ repeat_blocks:
     partial_motifs_allowed: false
 caller_resources:
   vamos: {repeat_catalog: null}
-  straglr: {repeat_catalog: null}
+  straglr: {repeat_catalog: null, allow_provisional_adapter: false, additional_arguments: []}
   tandem_genotypes: {repeat_definition: null}
 gui_contract:
   comparison_panel_id: UMN_HTT_CLINICAL_COMPARATORS

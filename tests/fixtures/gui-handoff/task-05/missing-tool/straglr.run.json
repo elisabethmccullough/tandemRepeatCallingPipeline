@@ -1,0 +1,36 @@
+{
+  "analysis_source": "RAW_READS",
+  "assignment_state": "UNASSIGNED",
+  "associated_sequence_id": null,
+  "caller": "STRAGLR",
+  "caller_version": null,
+  "catalog_identity": {
+    "path": "resources/synthetic-catalog.tsv",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "size_bytes": 18
+  },
+  "command_record_paths": [
+    "execution-records/straglr-read.json"
+  ],
+  "completed_utc": "2026-01-01T00:00:01Z",
+  "failure": null,
+  "input_file_ids": [
+    "prepared-bam",
+    "reference",
+    "catalog"
+  ],
+  "native_output_file_ids": [],
+  "raw_version_output": null,
+  "record_schema_version": "1.0",
+  "run_id": "synthetic-missing-tool",
+  "stage_id": "05_run_straglr",
+  "started_utc": "2026-01-01T00:00:00Z",
+  "status": "TOOL_MISSING",
+  "warnings": [
+    "missing tool"
+  ],
+  "caller_resource_settings": {
+    "allow_provisional_adapter": false,
+    "additional_arguments": []
+  }
+}

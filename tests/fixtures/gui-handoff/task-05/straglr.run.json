@@ -1,0 +1,38 @@
+{
+  "analysis_source": "RAW_READS",
+  "assignment_state": "UNASSIGNED",
+  "associated_sequence_id": null,
+  "caller": "STRAGLR",
+  "caller_version": "1.5.0",
+  "catalog_identity": {
+    "path": "resources/synthetic-catalog.tsv",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "size_bytes": 18
+  },
+  "command_record_paths": [
+    "execution-records/straglr-read.json"
+  ],
+  "completed_utc": "2026-01-01T00:00:01Z",
+  "failure": null,
+  "input_file_ids": [
+    "prepared-bam",
+    "reference",
+    "catalog"
+  ],
+  "native_output_file_ids": [
+    "straglr-native-1"
+  ],
+  "raw_version_output": "STRaglr 1.5.0\n",
+  "record_schema_version": "1.0",
+  "run_id": "synthetic-task-05-run",
+  "stage_id": "05_run_straglr",
+  "started_utc": "2026-01-01T00:00:00Z",
+  "status": "SUCCEEDED",
+  "warnings": [
+    "Synthetic provisional-adapter fixture."
+  ],
+  "caller_resource_settings": {
+    "allow_provisional_adapter": true,
+    "additional_arguments": []
+  }
+}
