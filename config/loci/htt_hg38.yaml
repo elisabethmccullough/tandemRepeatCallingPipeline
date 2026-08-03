@@ -23,7 +23,13 @@ repeat_blocks:
 caller_resources:
   vamos: {repeat_catalog: null}
   straglr: {repeat_catalog: null, allow_provisional_adapter: false, additional_arguments: []}
-  tandem_genotypes: {repeat_definition: null}
+  tandem_genotypes:
+    repeat_definition: null
+    allow_provisional_last_adapter: false
+    allow_provisional_tandem_genotypes_adapter: false
+    lastdb_additional_arguments: []
+    lastal_additional_arguments: []
+    tandem_genotypes_additional_arguments: []
 gui_contract:
   comparison_panel_id: UMN_HTT_CLINICAL_COMPARATORS
   comparison_panel_version: development

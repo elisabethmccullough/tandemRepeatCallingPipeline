@@ -1,0 +1,26 @@
+{
+  "record_schema_version": "1.0",
+  "status": "AVAILABLE",
+  "records": [
+    {
+      "record_schema_version": "1.0",
+      "record_id": "tg-record-1",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "0.1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "native_record_identifier": "record-1",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": "patient-hap1",
+      "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+      "source_file_id": "tg-patient-hap1",
+      "source_file_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "coordinate_space": "UNKNOWN_COORDINATE_SPACE",
+      "raw_fields": {
+        "repeat_count": "020"
+      },
+      "normalization_warnings": [
+        "native coordinate space is unverified"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "record_schema_version": "1.0",
+  "caller": "TANDEM_GENOTYPES",
+  "caller_version": "0.1.0",
+  "status": "SUCCEEDED",
+  "associated_sequence_id": "patient-hap2"
+}

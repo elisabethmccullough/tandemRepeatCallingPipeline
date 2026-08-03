@@ -200,7 +200,12 @@
         "tandem_genotypes": {
           "type": "object",
           "required": [
-            "repeat_definition"
+            "repeat_definition",
+            "allow_provisional_last_adapter",
+            "allow_provisional_tandem_genotypes_adapter",
+            "lastdb_additional_arguments",
+            "lastal_additional_arguments",
+            "tandem_genotypes_additional_arguments"
           ],
           "properties": {
             "repeat_definition": {
@@ -209,6 +214,35 @@
                 "null"
               ],
               "description": "Resource path or explicit unavailable value."
+            },
+            "allow_provisional_last_adapter": {
+              "type": "boolean",
+              "default": false
+            },
+            "allow_provisional_tandem_genotypes_adapter": {
+              "type": "boolean",
+              "default": false
+            },
+            "lastdb_additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "lastal_additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "tandem_genotypes_additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
             }
           },
           "additionalProperties": false

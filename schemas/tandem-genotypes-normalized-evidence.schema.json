@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "record_schema_version"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    }
+  },
+  "additionalProperties": true,
+  "$id": "https://umn.example/schemas/tandem-genotypes-normalized-evidence.schema.json",
+  "title": "Tandem Genotypes Normalized Evidence"
+}

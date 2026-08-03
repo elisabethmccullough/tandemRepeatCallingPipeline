@@ -1,0 +1,2 @@
+record_id	allele_id	sequence_id	motif	motif_chain	repeat_count	repeat_length_bp	caller_extra
+record-1	allele-1	patient-hap1	CAG	CAG*20,CAA*1	020	.	00123

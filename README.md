@@ -217,3 +217,29 @@ version, adapter setting, additional arguments, and native output identities.
 tr-pipeline run --config config/example.yaml --start-stage 05_run_straglr --stop-stage 05_run_straglr
 tr-pipeline run --config config/example.yaml --dry-run --start-stage 05_run_straglr --stop-stage 05_run_straglr
 ```
+
+## LAST and tandem-genotypes (development gated)
+
+Stages 06–07 resolve `lastdb`, `lastal`, and `tandem-genotypes` from `tools`.
+They may be optional; a missing optional tool yields terminal missing-tool metadata,
+whereas required tools fail their stage. Configure the sole repeat resource under
+`caller_resources.tandem_genotypes.repeat_definition` in the locus YAML (relative
+to that YAML). The pipeline never searches for or invents this file.
+
+There are no laboratory-verified adapters yet. Provisional LAST and caller syntax
+must be enabled separately with `allow_provisional_last_adapter` and
+`allow_provisional_tandem_genotypes_adapter`; additional argument arrays are part
+of resume identity. Unknown versions and formats are preserved and reported, not
+guessed. Preparation writes one deterministic FASTA, private LAST database, and
+MAF alignment per exact patient sequence. Native caller files remain immutable;
+normalization retains raw strings and direct sequence association. Unverified
+coordinates remain null with `UNKNOWN_COORDINATE_SPACE`.
+
+```bash
+tr-pipeline run --config config/example.yaml --start-stage 06_prepare_tandem_genotypes --stop-stage 07_run_tandem_genotypes
+tr-pipeline run --config config/example.yaml --dry-run --start-stage 06_prepare_tandem_genotypes --stop-stage 07_run_tandem_genotypes
+```
+
+LAST alignment never modifies the authoritative sequence. No parental origin or
+clinical interpretation is inferred. Real integration remains pending tests on
+verified laboratory installations.
