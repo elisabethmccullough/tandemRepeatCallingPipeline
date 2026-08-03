@@ -41,11 +41,19 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
         "REFERENCE_FASTA": (Path(inputs["reference_fasta"]),),
         "REFERENCE_FASTA_INDEX": (Path(inputs["reference_fasta_index"]),),
         "LOCUS_CONFIG": (Path(config["locus_config"]),),
-        "VALIDATED_INPUTS": (root / "00_manifest" / "validated-inputs.json",),
-        "PREPARED_MINI_BAM": (root / "02_prepared_bam" / "original.mini.bam",),
-        "PREPARED_MINI_BAM_INDEX": (root / "02_prepared_bam" / "original.mini.bam.bai",),
-        "ALIGNED_ASSEMBLY": (root / "03_assembly_alignment" / "assembly.bam",),
-        "ALIGNED_ASSEMBLY_INDEX": (root / "03_assembly_alignment" / "assembly.bam.bai",),
+        "VALIDATED_INPUTS": (root / "01_inputs" / "validated-inputs.json",),
+        "PATIENT_SEQUENCE_METADATA": (root / "01_inputs" / "patient-sequences.metadata.json",),
+        "PREPARED_MINI_BAM": (root / "02_prepared_bam" / "prepared.mini.bam",),
+        "PREPARED_MINI_BAM_INDEX": (root / "02_prepared_bam" / "prepared.mini.bam.bai",),
+        "BAM_VALIDATION_REPORT": (root / "02_prepared_bam" / "input_bam.validation.json",),
+        "BAM_FLAGSTAT": (root / "02_prepared_bam" / "input_bam.flagstat.txt",),
+        "BAM_IDXSTATS": (root / "02_prepared_bam" / "input_bam.idxstats.txt",),
+        "ALIGNED_ASSEMBLY": (root / "03_assembly_alignment" / "assembly.aligned.sorted.bam",),
+        "ALIGNED_ASSEMBLY_INDEX": (root / "03_assembly_alignment" / "assembly.aligned.sorted.bam.bai",),
+        "ASSEMBLY_ALIGNMENT_SUMMARY": (root / "03_assembly_alignment" / "assembly_alignment.summary.json",),
+        "ASSEMBLY_RECORD_MAPPINGS": (root / "03_assembly_alignment" / "assembly_record_mappings.json",),
+        "PACKAGE_PATIENT_FASTA": (root / "03_assembly_alignment" / "patient-sequences.fasta",),
+        "PACKAGE_PATIENT_METADATA": (root / "03_assembly_alignment" / "patient-sequences.metadata.json",),
         "VAMOS_READ_NATIVE_OUTPUT": (root / "04_vamos_read" / "vamos_read.vcf.gz",),
         "VAMOS_CONTIG_NATIVE_OUTPUT": (root / "05_vamos_contig" / "vamos_contig.vcf.gz",),
         "STRAGLR_NATIVE_OUTPUT": (root / "06_straglr" / "straglr.tsv",),
@@ -148,6 +156,30 @@ def _stage_digest(stage: StageDefinition, config: dict[str, Any], mode: str | No
     })
 
 
+def _native_tool(config: dict[str, Any], config_directory: Path, tool_id: str) -> Tool:
+    executable, required = DEFAULT_TOOLS[tool_id]
+    settings = config.get("tools", {}).get(TOOL_CONFIG_KEYS[tool_id], {})
+    tool = resolve_tool(Tool(ToolId(tool_id), tool_id.replace("_", " ").title(),
+        settings.get("executable", executable), settings.get("required", required)), config_directory)
+    if not tool.resolved_executable:
+        raise ConfigurationError(f"required tool {tool_id} is unavailable: {tool.configured_executable}")
+    return detect_version(tool)
+
+
+def _execute_implemented_stage(stage: StageDefinition, config: dict[str, Any], root: Path, config_directory: Path, overwrite: bool) -> None:
+    if stage.stage_id == "00_validate_inputs":
+        from .inputs import validate_inputs
+        validate_inputs(config, root / "01_inputs")
+    elif stage.stage_id == "01_prepare_bam":
+        from .bam import prepare_bam
+        prepare_bam(config["inputs"]["mini_bam"], config["inputs"]["mini_bam_index"], root / "02_prepared_bam",
+            _native_tool(config, config_directory, "SAMTOOLS"), overwrite=overwrite)
+    elif stage.stage_id == "02_align_assembly":
+        from .alignment import align_assembly
+        align_assembly(config, root / "03_assembly_alignment", _native_tool(config, config_directory, "MINIMAP2"),
+            _native_tool(config, config_directory, "SAMTOOLS"), overwrite=overwrite)
+
+
 def _archive_invalidated(path: Path, prior: dict[str, Any], reason: ResumeReason) -> None:
     invalidated = dict(prior)
     invalidated["status"] = StageStatus.INVALIDATED.value
@@ -178,13 +210,12 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
         input_paths = tuple(path for role in stage.required_input_roles for path in role_paths.get(role, ()))
         output_paths = tuple(path for role in stage.expected_output_roles for path in role_paths.get(role, ()))
         inputs = _identities(input_paths)
-        outputs = _identities(output_paths)
+        prior_output_paths = tuple(Path(str(item["path"])) for item in (prior or {}).get("output_file_identities", []))
+        outputs = _identities((*output_paths, *prior_output_paths))
         tools = _tool_identities(stage, config, config_directory, execution_mode)
         evaluated_reason = resume_eligibility(prior, digest, inputs, outputs, tools)
         if evaluated_reason is ResumeReason.RESUME_ALLOWED and any(not path.is_file() for path in input_paths):
             evaluated_reason = ResumeReason.INPUT_CHANGED
-        if evaluated_reason is ResumeReason.RESUME_ALLOWED and any(not path.is_file() for path in output_paths):
-            evaluated_reason = ResumeReason.OUTPUT_MISSING
 
         if resume and evaluated_reason is ResumeReason.RESUME_ALLOWED:
             now = utc_now()
@@ -212,10 +243,14 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
 
         now = utc_now()
         effective_modes = sorted({str(tool["execution_mode"]) for tool in tools})
+        implemented = stage.order <= 2
+        status = StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value
+        warnings = (["Dry run: biological outputs and external commands were not created."] if dry_run and implemented else
+            (["Caller-specific execution is deferred; this record describes scaffold planning only."] if not implemented else []))
         record = {
             "record_schema_version": "1.0",
             "stage_id": stage.stage_id,
-            "status": StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value,
+            "status": status,
             "started_utc": now,
             "completed_utc": now,
             "duration_seconds": 0.0,
@@ -226,9 +261,31 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "execution_mode": execution_mode or (effective_modes[0] if len(effective_modes) == 1 else "NATIVE"),
             "overwrite": overwrite,
             "command_record_paths": [],
-            "warnings": ["Caller-specific execution is deferred; this record describes scaffold planning only."],
+            "warnings": warnings,
             "failure": None,
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
+        if implemented and not dry_run:
+            record["status"] = StageStatus.RUNNING.value
+            record["completed_utc"] = None
+            atomic_write_json(record_path, record)
+            try:
+                _execute_implemented_stage(stage, config, root, config_directory, overwrite)
+                missing = [str(path) for path in output_paths if not path.is_file() or path.stat().st_size == 0]
+                if missing:
+                    raise RuntimeError(f"stage required outputs are missing or empty: {', '.join(missing)}")
+                record["status"] = StageStatus.SUCCEEDED.value
+                record["output_file_identities"] = _identities(output_paths)
+                record["command_record_paths"] = [str(path) for path in sorted(
+                    (root / ("02_prepared_bam" if stage.order == 1 else "03_assembly_alignment") / "execution-records").glob("*.json")
+                )] if stage.order in (1, 2) else []
+                record["completed_utc"] = utc_now()
+            except Exception as exc:
+                record["status"] = StageStatus.FAILED.value
+                record["completed_utc"] = utc_now()
+                record["failure"] = {"error_type": type(exc).__name__, "message": str(exc)}
+                atomic_write_json(record_path, record)
+                raise
+            atomic_write_json(record_path, record)
     return root

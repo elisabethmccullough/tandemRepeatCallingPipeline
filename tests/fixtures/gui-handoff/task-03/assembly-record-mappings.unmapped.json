@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "coordinate_convention": "zero_based_half_open",
+  "mappings": [
+    {
+      "record_schema_version": "1.0",
+      "sequence_id": "patient-unmapped",
+      "source_fasta_record_id": "PATIENT_UNMAPPED",
+      "sequence_sha256": "9088ba6f378fb9ca6181778a678e89c6a9db7fa06e7336019b54e75722118faa",
+      "reference_contig": null,
+      "alignment_start": null,
+      "alignment_end": null,
+      "coordinate_convention": "zero_based_half_open",
+      "reference_alignment_strand": "UNKNOWN",
+      "mapping_quality": null,
+      "cigar": null,
+      "primary_alignment_count": 0,
+      "secondary_alignment_count": 0,
+      "supplementary_alignment_count": 0,
+      "mapped_base_count": null,
+      "source_sequence_length": 8,
+      "alignment_span": null,
+      "original_orientation": "AS_STORED",
+      "display_orientation": "UNRESOLVED",
+      "reverse_complement_required": null,
+      "mapping_status": "UNMAPPED",
+      "warnings": [
+        "mapping status is UNMAPPED"
+      ]
+    }
+  ]
+}

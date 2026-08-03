@@ -103,6 +103,9 @@
           "items": {
             "$ref": "#/$defs/assemblyRecord"
           }
+        },
+        "reference_scope": {
+          "enum": ["WHOLE_GENOME_REFERENCE", "LOCAL_LOCUS_REFERENCE", "UNKNOWN_REFERENCE_SCOPE"]
         }
       },
       "additionalProperties": false
@@ -173,6 +176,15 @@
           "type": "boolean",
           "description": "Plan without caller execution."
         }
+      },
+      "additionalProperties": false
+    },
+    "assembly_alignment": {
+      "type": "object",
+      "properties": {
+        "minimap2_preset": {"type": "string", "minLength": 1},
+        "secondary": {"type": "boolean"},
+        "threads": {"type": "integer", "minimum": 1}
       },
       "additionalProperties": false
     },

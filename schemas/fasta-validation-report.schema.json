@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "valid",
+    "source_file_sha256",
+    "records"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "valid": {
+      "const": true
+    },
+    "source_file_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1
+    }
+  }
+}
