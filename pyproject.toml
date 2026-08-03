@@ -12,6 +12,9 @@ dependencies = ["PyYAML>=6.0"]
 [project.optional-dependencies]
 dev = ["pytest>=7.4"]
 
+[project.scripts]
+tr-pipeline = "tr_calling_pipeline.cli:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

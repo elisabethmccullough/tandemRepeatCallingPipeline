@@ -71,3 +71,25 @@ Each run creates `outputs/<sample_id>_<locus_id>/` with `00_manifest`, `01_input
 Manifests support resolved paths, SHA-256 checksums, commit identity, tool versions, stage states, outputs, warnings, and completion state. Future work must pin/install caller versions, confirm locus coordinates and caller arguments, implement tool-version capture and lifecycle updates in the orchestrator, implement native parsers, and validate with controlled datasets. Dry-run still requires real non-empty fixture inputs so validation remains meaningful.
 
 This software is for pipeline development and research only. It performs no clinical interpretation and does not classify alleles or provide medical conclusions.
+
+## Versioned pipeline–GUI contracts
+
+JSON Schema Draft 2020-12 contracts live in `schemas/` for run and locus
+configuration, lossless normalized caller evidence, and GUI-facing case
+manifests. Stable enum values and GUI coordination decisions are documented in
+`docs/gui-handoff/task-01-contracts.md`; frozen valid and invalid GUI fixtures
+live under `tests/fixtures/case-packages/`.
+
+After installation, validate or inspect contracts with:
+
+```bash
+tr-pipeline validate-run-config config/example.yaml
+tr-pipeline validate-locus-config config/loci/htt_hg38.yaml
+tr-pipeline validate-case-package tests/fixtures/case-packages/minimal
+tr-pipeline print-resolved-config config/example.yaml
+```
+
+Case-package inventory paths are package-relative POSIX paths. Validation rejects
+absolute paths, traversal, duplicate identities, unknown file references, and
+symlink escapes. Caller evidence retains raw strings and structured values and
+keeps `RAW_READS` separate from `ASSEMBLED_CONTIG`.
