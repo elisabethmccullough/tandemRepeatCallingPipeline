@@ -41,6 +41,8 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
         "REFERENCE_FASTA": (Path(inputs["reference_fasta"]),),
         "REFERENCE_FASTA_INDEX": (Path(inputs["reference_fasta_index"]),),
         "LOCUS_CONFIG": (Path(config["locus_config"]),),
+        "RUN_CONFIG": (Path(config["_config_path"]),),
+        "PIPELINE_MANIFEST": (root / "00_manifest" / "pipeline-run-manifest.json",),
         "VALIDATED_INPUTS": (root / "01_inputs" / "validated-inputs.json",),
         "PATIENT_SEQUENCE_METADATA": (root / "01_inputs" / "patient-sequences.metadata.json",),
         "PREPARED_MINI_BAM": (root / "02_prepared_bam" / "prepared.mini.bam",),
@@ -81,7 +83,7 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
         "UNIFIED_VALIDATION_REPORT": (root / "09_normalized_evidence" / "validation-report.json",),
         "NORMALIZED_EVIDENCE": (root / "09_normalized_evidence" / "normalized-evidence.json",),
         "CASE_PACKAGE": (Path(config["case_package"]["package_root"]) / "case-manifest.json",),
-        "VALIDATED_CASE_PACKAGE": (Path(config["case_package"]["package_root"]) / "case-manifest.json",),
+        "PACKAGE_VALIDATION_REPORT": (Path(config["case_package"]["package_root"]) / "package-validation.json",),
     }
 
 
@@ -212,6 +214,14 @@ def _execute_implemented_stage(stage: StageDefinition, config: dict[str, Any], r
     elif stage.stage_id == "08_normalize_outputs":
         from .normalization import run_normalization_stage
         run_normalization_stage(config, root, overwrite=overwrite)
+    elif stage.stage_id == "09_build_case_package":
+        from .case_package import build_case_package
+        build_case_package(config, root, overwrite=overwrite)
+    elif stage.stage_id == "10_validate_case_package":
+        from .case_package_validation import validate_case_package
+        report = validate_case_package(config["case_package"]["package_root"], write_report=True)
+        if not report["valid"]:
+            raise ConfigurationError("case package integrity validation failed")
 
 
 def _archive_invalidated(path: Path, prior: dict[str, Any], reason: ResumeReason) -> None:
@@ -231,6 +241,10 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
     root = _run_root(config)
     records = root / "00_manifest" / "stages"
     records.mkdir(parents=True, exist_ok=True)
+    pipeline_manifest = root / "00_manifest" / "pipeline-run-manifest.json"
+    if not pipeline_manifest.exists():
+        atomic_write_json(pipeline_manifest, {"record_schema_version": "1.0", "pipeline": asdict(pipeline_identity()),
+                                              "run": config["run"], "created_utc": utc_now()})
     role_paths = _role_paths(config, root)
 
     # Validate a global override even when the selected stage has no external tool.
@@ -302,7 +316,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
 
         now = utc_now()
         effective_modes = sorted({str(tool["execution_mode"]) for tool in tools})
-        implemented = stage.order <= 8
+        implemented = stage.order <= 10
         status = StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value
         warnings = (["Dry run: biological outputs and external commands were not created."] if dry_run and implemented else
             (["Caller-specific execution is deferred; this record describes scaffold planning only."] if not implemented else []))
@@ -325,7 +339,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
-        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7, 8):
+        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7, 8, 9, 10):
             if stage.order == 5:
                 from .callers.straglr import run_straglr_stage
                 run_straglr_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
@@ -338,9 +352,12 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             elif stage.order == 7:
                 from .callers.tandem_genotypes import run_tandem_genotypes_stage
                 run_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
-            else:
+            elif stage.order == 8:
                 from .normalization import run_normalization_stage
                 run_normalization_stage(config, root, overwrite=overwrite, dry_run=True)
+            elif stage.order == 9:
+                from .case_package import build_case_package
+                build_case_package(config, root, overwrite=overwrite, dry_run=True)
         if implemented and not dry_run:
             record["status"] = StageStatus.RUNNING.value
             record["completed_utc"] = None
@@ -367,7 +384,8 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
                 record["command_record_paths"] = [str(path) for path in sorted(execution_root.glob("**/execution-records/*.json"))] if execution_root else []
                 record["completed_utc"] = utc_now()
             except Exception as exc:
-                record["status"] = StageStatus.FAILED.value
+                record["status"] = (StageStatus.INVALID.value if stage.stage_id == "10_validate_case_package"
+                                    and isinstance(exc, ConfigurationError) else StageStatus.FAILED.value)
                 record["completed_utc"] = utc_now()
                 record["failure"] = {"error_type": type(exc).__name__, "message": str(exc)}
                 atomic_write_json(record_path, record)

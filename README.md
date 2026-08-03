@@ -300,3 +300,36 @@ consensus, cross-caller reconciliation, or clinical interpretation is produced;
 native caller outputs remain authoritative and unchanged. See
 `docs/gui-handoff/task-07-unified-normalization.md` for the GUI contract and
 limitations.
+# Portable case packages (Stages 09 and 10)
+
+Stages `09_build_case_package` and `10_validate_case_package` create and
+independently validate the stable GUI handoff. The package contains authoritative
+upstream-assembler (for example, LoMA) patient FASTA and metadata, unchanged
+unified evidence, preserved native outputs, optional locus mini-BAM/alignment
+artifacts, configuration, provenance, a manifest, and a SHA-256 inventory.
+Internal GUI-required paths are package-relative; the folder can move to a
+different machine and the GUI needs neither this repository nor the run folder.
+
+Safe defaults include native evidence, the prepared locus mini-BAM, alignment
+artifacts, and argv command records. Set the corresponding
+`case_package.include_*` option false to omit optional content. Configuration
+with secret-like keys is rejected, symlinks and special files are not packaged,
+unexpected files are validation errors, and publication uses a private work
+directory. Existing packages require overwrite; replacement occurs only after
+the new package validates. Input, option, manifest, or packaged-byte changes
+invalidate conservative resume. Timestamps may differ, while package IDs,
+file IDs, layout, ordering, and payload bytes are deterministic.
+
+```bash
+tr-pipeline run --config config/example.yaml \
+  --start-stage 09_build_case_package --stop-stage 10_validate_case_package
+tr-pipeline validate-case-package --package /path/to/case-package
+tr-pipeline run --config config/example.yaml --dry-run \
+  --start-stage 09_build_case_package --stop-stage 10_validate_case_package
+```
+
+The pipeline packages caller evidence around authoritative patient sequences;
+it does not reconcile callers. Native outputs remain preserved. The result has
+no consensus, preferred caller, parental-origin inference, expansion
+classification, clinical threshold, or clinical interpretation. See
+`docs/gui-handoff/task-08-case-package.md` for the GUI contract.

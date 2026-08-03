@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_schema_version", "package_id", "excluded", "files"],
+  "properties": {
+    "record_schema_version": {"const": "1.0"},
+    "package_id": {"type": "string", "pattern": "^case-[a-f0-9]{24}$"},
+    "excluded": {"type": "array", "items": {"type": "string"}},
+    "files": {"type": "array", "items": {"type": "object", "additionalProperties": false,
+      "required": ["relative_path", "sha256", "size_bytes"],
+      "properties": {"relative_path": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "size_bytes": {"type": "integer", "minimum": 0}}}}
+  }
+}

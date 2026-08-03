@@ -19,6 +19,10 @@ locus_config: loci/htt_hg38.yaml
 case_package:
   enabled: true
   package_root: ../case-packages
+  include_prepared_mini_bam: true
+  include_alignment_artifacts: true
+  include_native_outputs: true
+  include_command_records: true
   comparison_panel: {panel_id: UMN_HTT_CLINICAL_COMPARATORS, panel_version: development, required: false}
 execution: {threads: 4, dry_run: false}
 
