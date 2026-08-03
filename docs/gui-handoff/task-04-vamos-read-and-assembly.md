@@ -26,9 +26,11 @@ or present a clinical interpretation.
 
 ## Provisional decisions
 
-Only version strings matching VAMOS 2.x select the isolated provisional
-adapter. Its command flags, final native formats, and catalog format require
-confirmation against the laboratory installation. Read-derived assignment,
+No VAMOS release currently has a laboratory-verified adapter. The isolated
+provisional adapter is disabled by default; a development-only configuration
+opt-in permits fake-tool testing for 2.x-shaped version strings. This does not
+declare any real 2.x release supported. Its command flags, final native formats,
+and catalog format require confirmation against the laboratory installation. Read-derived assignment,
 caller-specific display columns, and cross-caller comparison remain deferred.
 
 ## Matching GUI work

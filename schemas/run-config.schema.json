@@ -253,6 +253,16 @@
                 "NATIVE",
                 "APPTAINER"
               ]
+            },
+            "allow_provisional_adapter": {
+              "type": "boolean",
+              "default": false,
+              "description": "Development-only opt-in to the unverified VAMOS 2.x command adapter. Omission is false."
+            },
+            "additional_arguments": {
+              "type": "array",
+              "items": {"type": "string"},
+              "default": []
             }
           },
           "additionalProperties": false
