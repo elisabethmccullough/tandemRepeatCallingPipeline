@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/run-config.schema.json",
+  "title": "Pipeline run configuration",
+  "description": "Inputs, identity, execution, and optional GUI package settings for one pipeline run.",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run",
+    "inputs",
+    "locus_config",
+    "case_package",
+    "execution"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "description": "Contract version."
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "subject_id",
+        "sample_id",
+        "locus_id",
+        "output_root",
+        "overwrite"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "case_id identifier."
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "subject_id identifier."
+        },
+        "sample_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "sample_id identifier."
+        },
+        "locus_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "locus_id identifier."
+        },
+        "output_root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "overwrite": {
+          "type": "boolean",
+          "description": "Whether an existing run output may be replaced."
+        }
+      },
+      "additionalProperties": false
+    },
+    "inputs": {
+      "type": "object",
+      "required": [
+        "assembly_fasta",
+        "assembly_records",
+        "mini_bam",
+        "mini_bam_index",
+        "reference_fasta",
+        "reference_fasta_index"
+      ],
+      "properties": {
+        "assembly_fasta": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "mini_bam": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "mini_bam_index": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "reference_fasta": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "reference_fasta_index": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "assembly_records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/assemblyRecord"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "locus_config": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path resolved relative to the run configuration directory when not absolute."
+    },
+    "case_package": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "package_root",
+        "comparison_panel"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Create a GUI package."
+        },
+        "package_root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "comparison_panel": {
+          "type": "object",
+          "required": [
+            "panel_id",
+            "panel_version",
+            "required"
+          ],
+          "properties": {
+            "panel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+              "description": "Safe, non-empty serialized identifier."
+            },
+            "panel_version": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Panel version."
+            },
+            "required": {
+              "type": "boolean",
+              "description": "Whether panel evidence is required."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "threads",
+        "dry_run"
+      ],
+      "properties": {
+        "threads": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum worker threads."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Plan without caller execution."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "assemblyRecord": {
+      "type": "object",
+      "required": [
+        "record_id",
+        "sequence_id",
+        "display_label",
+        "sequence_role"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "sequence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "display_label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable label."
+        },
+        "sequence_role": {
+          "enum": [
+            "PATIENT_HAPLOTYPE",
+            "PATIENT_CONSENSUS",
+            "REFERENCE_SEQUENCE",
+            "COMPARISON_SEQUENCE"
+          ],
+          "description": "Stable sequence-role vocabulary."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

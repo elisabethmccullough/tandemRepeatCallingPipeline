@@ -1,18 +1,29 @@
-# PRELIMINARY: coordinates and caller parameters require confirmation.
-locus_id: HTT
-gene: HTT
-reference_build: GRCh38
-chromosome: chr4
-target_region:
-  start: null
-  end: null
-repeat:
-  reference_motif: CAG
-  known_interruptions:
-    - CAA
-    - CCG
-    - CCA
-notes:
-  - Coordinates must be confirmed before caller execution.
-  - This configuration is for pipeline development only.
-  - No clinical interpretation is performed.
+# Development contract: unknown biological coordinates and anchors remain explicit nulls.
+schema_version: "1.0"
+locus_config_id: UMN_HTT_GRCH38
+locus_config_version: 0.1.0-development
+release_status: development
+locus:
+  locus_id: HTT
+  gene: HTT
+  reference_build: GRCh38
+  assembly_accession: GCA_000001405.15
+  chromosome: chr4
+  target_region: {start: null, end: null, coordinate_convention: zero_based_half_open}
+measurement: {coordinate_convention: inter_base, left_flanking_anchor: null, right_flanking_anchor: null}
+repeat_blocks:
+  - block_id: HTT_CAG
+    label: HTT CAG tract
+    order: 1
+    motifs:
+      - {motif_id: CAG, canonical_sequence: CAG, aliases: [], rotations: []}
+    interruptions: []
+    spacers: []
+    partial_motifs_allowed: false
+caller_resources:
+  vamos: {repeat_catalog: null}
+  straglr: {repeat_catalog: null}
+  tandem_genotypes: {repeat_definition: null}
+gui_contract:
+  comparison_panel_id: UMN_HTT_CLINICAL_COMPARATORS
+  comparison_panel_version: development

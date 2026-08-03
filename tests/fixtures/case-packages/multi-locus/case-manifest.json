@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "case_id": "CASE001",
+  "subject_id": "SUBJECT001",
+  "package_created_utc": "2026-01-01T00:00:00Z",
+  "pipeline": {
+    "name": "tandemRepeatCallingPipeline",
+    "version": "0.1.0",
+    "git_commit": null
+  },
+  "loci": [
+    {
+      "locus_id": "HTT",
+      "reference_build": "GRCh38",
+      "assembly_accession": "GCA_000001405.15",
+      "locus_config": {
+        "config_id": "UMN_HTT_GRCH38",
+        "version": "0.1.0-development",
+        "path": "loci/htt.yaml",
+        "sha256": "c2641720e95275394f67c40972a488bb91ace066f57f4cccc17bdc1f47df6b02"
+      },
+      "comparison_panel": {
+        "panel_id": "UMN_HTT_COMPARATORS",
+        "panel_version": "development"
+      },
+      "patient_sequences": [
+        {
+          "sequence_id": "htt-hap1",
+          "sequence_role": "PATIENT_HAPLOTYPE",
+          "display_label": "htt-hap1",
+          "source_fasta_file_id": "assembly",
+          "source_fasta_record_id": "HAP1",
+          "sequence_sha256": "a51d3bd7a5c9afde6c00f03ffdbb362e0ac874e0995747389841616ff51271f3",
+          "original_orientation": "AS_STORED",
+          "reference_alignment_strand": "UNKNOWN",
+          "display_orientation": "AS_STORED",
+          "source_coordinates": null
+        }
+      ],
+      "native_caller_outputs": [],
+      "normalized_evidence": [],
+      "required_evidence": {
+        "ASSEMBLY_SEQUENCE": "AVAILABLE"
+      },
+      "optional_evidence": {
+        "COMPARISON_PANEL": "NOT_COMPUTED"
+      },
+      "warnings": [
+        "Development fixture; no clinical interpretation."
+      ]
+    },
+    {
+      "locus_id": "RFC1",
+      "reference_build": "GRCh38",
+      "assembly_accession": "GCA_000001405.15",
+      "locus_config": {
+        "config_id": "UMN_RFC1_GRCH38",
+        "version": "0.1.0-development",
+        "path": "loci/rfc1.yaml",
+        "sha256": "1450c37ceadde407fa37a679bfe9559e963b4a4d7f3e1e68a9d8931cc3cfcf40"
+      },
+      "comparison_panel": {
+        "panel_id": "UMN_RFC1_COMPARATORS",
+        "panel_version": "development"
+      },
+      "patient_sequences": [
+        {
+          "sequence_id": "rfc1-consensus",
+          "sequence_role": "PATIENT_CONSENSUS",
+          "display_label": "rfc1-consensus",
+          "source_fasta_file_id": "assembly",
+          "source_fasta_record_id": "CONSENSUS",
+          "sequence_sha256": "5a598334c0f9f84f3c571cd25865889e56b281fc1175541f5051fa958846b828",
+          "original_orientation": "AS_STORED",
+          "reference_alignment_strand": "UNKNOWN",
+          "display_orientation": "AS_STORED",
+          "source_coordinates": null
+        }
+      ],
+      "native_caller_outputs": [],
+      "normalized_evidence": [],
+      "required_evidence": {
+        "ASSEMBLY_SEQUENCE": "AVAILABLE"
+      },
+      "optional_evidence": {
+        "COMPARISON_PANEL": "NOT_COMPUTED"
+      },
+      "warnings": [
+        "Development fixture; no clinical interpretation."
+      ]
+    }
+  ],
+  "files": [
+    {
+      "file_id": "assembly",
+      "role": "SOURCE_FASTA",
+      "path": "sequences/patient.fa",
+      "required": false,
+      "status": "NOT_COMPUTED",
+      "sha256": null,
+      "size_bytes": null,
+      "media_type": "text/plain",
+      "producer_stage": "FIXTURE"
+    },
+    {
+      "file_id": "htt-config",
+      "role": "LOCUS_CONFIG",
+      "path": "loci/htt.yaml",
+      "required": false,
+      "status": "NOT_COMPUTED",
+      "sha256": null,
+      "size_bytes": null,
+      "media_type": "text/plain",
+      "producer_stage": "FIXTURE"
+    },
+    {
+      "file_id": "rfc1-config",
+      "role": "LOCUS_CONFIG",
+      "path": "loci/rfc1.yaml",
+      "required": false,
+      "status": "NOT_COMPUTED",
+      "sha256": null,
+      "size_bytes": null,
+      "media_type": "text/plain",
+      "producer_stage": "FIXTURE"
+    }
+  ],
+  "warnings": []
+}

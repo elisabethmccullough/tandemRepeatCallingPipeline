@@ -1,22 +1,23 @@
+schema_version: "1.0"
 run:
+  case_id: CASE001
+  subject_id: SUBJECT001
   sample_id: HG00438
   locus_id: HTT
   output_root: ../outputs
-inputs:
-  assembly_fasta: path/to/assembly.fasta
-  mini_bam: path/to/sample.mini.bam
-  mini_bam_index: path/to/sample.mini.bam.bai
-  reference_fasta: path/to/hg38.fasta
-  reference_fasta_index: path/to/hg38.fasta.fai
-locus_config: loci/htt_hg38.yaml
-tools:
-  samtools: samtools
-  minimap2: minimap2
-  vamos: vamos
-  straglr: straglr.py
-  lastdb: lastdb
-  lastal: lastal
-  tandem_genotypes: tandem-genotypes
-execution:
-  threads: 4
   overwrite: false
+inputs:
+  assembly_fasta: ../data/assembly.fasta
+  assembly_records:
+    - {record_id: HAP1, sequence_id: patient-hap1, display_label: Patient HAP1, sequence_role: PATIENT_HAPLOTYPE}
+    - {record_id: HAP2, sequence_id: patient-hap2, display_label: Patient HAP2, sequence_role: PATIENT_HAPLOTYPE}
+  mini_bam: ../data/sample.mini.bam
+  mini_bam_index: ../data/sample.mini.bam.bai
+  reference_fasta: ../references/hg38.fasta
+  reference_fasta_index: ../references/hg38.fasta.fai
+locus_config: loci/htt_hg38.yaml
+case_package:
+  enabled: true
+  package_root: ../case-packages
+  comparison_panel: {panel_id: UMN_HTT_CLINICAL_COMPARATORS, panel_version: development, required: false}
+execution: {threads: 4, dry_run: false}

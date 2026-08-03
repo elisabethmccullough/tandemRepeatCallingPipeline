@@ -34,7 +34,9 @@ def create_manifest(config: dict[str, Any], config_path: str | Path) -> dict[str
     if "output_root" in config["run"]:
         resolved_paths["output_root"] = config["run"]["output_root"]
     checksums = {
-        key: file_checksum(path) for key, path in inputs.items() if Path(path).is_file()
+        key: file_checksum(path)
+        for key, path in inputs.items()
+        if isinstance(path, (str, Path)) and Path(path).is_file()
     }
     return {
         "run_id": f'{config["run"]["sample_id"]}_{config["run"]["locus_id"]}_{now.strftime("%Y%m%dT%H%M%SZ")}',

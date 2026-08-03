@@ -15,7 +15,7 @@ NORMALIZED_COLUMNS = [
     "strand_reverse_reads", "haplotype", "quality_status", "native_output_path",
     "normalization_notes",
 ]
-ALLOWED_ANALYSIS_SOURCES = frozenset({"raw_reads", "assembled_contig"})
+ALLOWED_ANALYSIS_SOURCES = frozenset({"RAW_READS", "ASSEMBLED_CONTIG"})
 WARNING_COLUMNS = ["caller", "native_output_path", "warning"]
 
 
