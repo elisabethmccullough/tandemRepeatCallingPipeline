@@ -313,10 +313,15 @@ def build_case_package(config: Mapping[str, Any], run_root: str | Path, *, overw
 
         manifest_root = run_root_path / "00_manifest"
         pipeline_manifest = manifest_root / "pipeline-run-manifest.json"
-        if not pipeline_manifest.is_file():
-            pipeline_manifest.parent.mkdir(parents=True, exist_ok=True)
-            atomic_write_json(pipeline_manifest, {"pipeline": asdict(pipeline_identity()), "run": identity})
-        files.append(_copy(work, pipeline_manifest, "provenance/pipeline-run-manifest.json", "PIPELINE_MANIFEST"))
+        if pipeline_manifest.is_file():
+            files.append(_copy(work, pipeline_manifest, "provenance/pipeline-run-manifest.json", "PIPELINE_MANIFEST"))
+        else:
+            # Focused construction must not repair or otherwise mutate its source
+            # run.  Synthesize the missing provenance directly in the private
+            # package work tree instead.
+            files.append(_write_summary(work, "provenance/pipeline-run-manifest.json",
+                {"record_schema_version": "1.0", "pipeline": asdict(pipeline_identity()), "run": identity,
+                 "warning": "Package-local summary: the source run had no pipeline manifest."}, "PIPELINE_MANIFEST"))
         stages = [_json(path) for path in sorted((manifest_root / "stages").glob("*.json")) if ".invalidated." not in path.name]
         tools = sorted({json.dumps(tool, sort_keys=True): tool for stage in stages for tool in stage.get("tool_identities", [])}.values(), key=lambda x: str(x.get("tool_id")))
         files.append(_write_summary(work, "provenance/stages.json", {"record_schema_version": "1.0", "stages": stages}, "STAGE_PROVENANCE"))
