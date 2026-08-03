@@ -27,7 +27,12 @@ def repository_commit(cwd: str | Path | None = None) -> str | None:
 
 def create_manifest(config: dict[str, Any], config_path: str | Path) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
-    inputs = {key: str(Path(value).resolve()) for key, value in config["inputs"].items()}
+    inputs = dict(config["inputs"])
+    resolved_paths = dict(inputs)
+    if "locus_config" in config:
+        resolved_paths["locus_config"] = config["locus_config"]
+    if "output_root" in config["run"]:
+        resolved_paths["output_root"] = config["run"]["output_root"]
     checksums = {
         key: file_checksum(path) for key, path in inputs.items() if Path(path).is_file()
     }
@@ -36,6 +41,7 @@ def create_manifest(config: dict[str, Any], config_path: str | Path) -> dict[str
         "sample_id": config["run"]["sample_id"], "locus_id": config["run"]["locus_id"],
         "start_time": now.isoformat(), "repository_commit": repository_commit(),
         "configuration_path": str(Path(config_path).resolve()), "resolved_inputs": inputs,
+        "resolved_paths": resolved_paths,
         "input_checksums": checksums, "tool_versions": {}, "stages": {},
         "output_paths": [], "warnings": [], "completion_status": "running",
     }

@@ -20,7 +20,12 @@ bash scripts/run_pipeline.sh --config config/example.yaml --dry-run
 pytest
 ```
 
-Edit a copy of `config/example.yaml` first. Relative paths are resolved from the invocation working directory. `--start-stage` and `--stop-stage` accept the numbered names listed below.
+Edit a copy of `config/example.yaml` first. Relative input paths, `locus_config`,
+and `run.output_root` are resolved from the directory containing the supplied run
+configuration YAML, not from the invocation working directory. Absolute paths are
+preserved. This makes a configuration behave identically wherever
+`run_pipeline.sh` is invoked. `--start-stage` and `--stop-stage` accept the
+numbered names listed below.
 
 ## Configuration
 
@@ -28,14 +33,14 @@ Edit a copy of `config/example.yaml` first. Relative paths are resolved from the
 run:
   sample_id: HG00438
   locus_id: HTT
-  output_root: outputs
+  output_root: ../outputs
 inputs:
   assembly_fasta: path/to/assembly.fasta
   mini_bam: path/to/sample.mini.bam
   mini_bam_index: path/to/sample.mini.bam.bai
   reference_fasta: path/to/hg38.fasta
   reference_fasta_index: path/to/hg38.fasta.fai
-locus_config: config/loci/htt_hg38.yaml
+locus_config: loci/htt_hg38.yaml
 execution:
   threads: 4
   overwrite: false

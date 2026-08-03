@@ -39,12 +39,12 @@ def validate_identifier(value: str, field: str = "identifier") -> str:
 
 
 def load_config(path: str | Path, *, check_inputs: bool = False) -> dict[str, Any]:
-    """Load YAML, validate its model, and resolve paths from the repository root.
+    """Load YAML, validate its model, and resolve paths from the YAML directory.
 
-    Relative paths are interpreted from the current working directory, allowing the
-    same checked-in configuration to be invoked consistently from the repository.
+    Relative paths are interpreted from the directory containing the run
+    configuration, independently of the process working directory.
     """
-    config_path = Path(path).expanduser()
+    config_path = Path(path).expanduser().resolve()
     if not config_path.is_file():
         raise ConfigurationError(f"Configuration file does not exist: {config_path}")
     try:
@@ -60,18 +60,21 @@ def load_config(path: str | Path, *, check_inputs: bool = False) -> dict[str, An
     if not isinstance(_get(data, "execution.threads"), int) or data["execution"]["threads"] < 1:
         raise ConfigurationError("execution.threads must be a positive integer")
 
-    base = Path.cwd()
-    data["_config_path"] = str(config_path.resolve())
+    base = config_path.parent
+    data["_config_path"] = str(config_path)
     for key, value in data["inputs"].items():
-        resolved = (base / value).resolve() if not Path(value).is_absolute() else Path(value).resolve()
+        input_path = Path(value).expanduser()
+        resolved = input_path if input_path.is_absolute() else (base / input_path).resolve()
         data["inputs"][key] = str(resolved)
         if check_inputs and (not resolved.is_file() or resolved.stat().st_size == 0):
             raise ConfigurationError(f"Input file is missing or empty ({key}): {resolved}")
     for field in ("locus_config",):
         value = Path(data[field]).expanduser()
-        data[field] = str(((base / value) if not value.is_absolute() else value).resolve())
+        data[field] = str(value if value.is_absolute() else (base / value).resolve())
         if check_inputs and not Path(data[field]).is_file():
             raise ConfigurationError(f"Locus configuration does not exist: {data[field]}")
     output = Path(data["run"]["output_root"]).expanduser()
-    data["run"]["output_root"] = str(((base / output) if not output.is_absolute() else output).resolve())
+    data["run"]["output_root"] = str(
+        output if output.is_absolute() else (base / output).resolve()
+    )
     return data
