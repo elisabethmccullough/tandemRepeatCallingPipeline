@@ -160,7 +160,11 @@
             }
           },
           "additionalProperties": false
-        }
+        },
+        "include_prepared_mini_bam": {"type": "boolean", "default": true},
+        "include_alignment_artifacts": {"type": "boolean", "default": true},
+        "include_native_outputs": {"type": "boolean", "default": true},
+        "include_command_records": {"type": "boolean", "default": true}
       },
       "additionalProperties": false
     },
