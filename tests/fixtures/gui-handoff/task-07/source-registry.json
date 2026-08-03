@@ -1,0 +1,77 @@
+{
+  "record_schema_version": "1.0",
+  "sources": [
+    {
+      "file_id": "source-1",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "path": "native/source-1.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": null
+    },
+    {
+      "file_id": "source-2",
+      "caller": "STRAGLR",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "path": "native/source-2.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": null
+    },
+    {
+      "file_id": "source-3",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-3.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap1"
+    },
+    {
+      "file_id": "source-4",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-4.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap2"
+    },
+    {
+      "file_id": "source-5",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-5.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap1"
+    },
+    {
+      "file_id": "source-6",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-6.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap2"
+    }
+  ]
+}

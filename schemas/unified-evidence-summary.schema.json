@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_schema_version",
+    "package_id",
+    "case_id",
+    "caller_summaries",
+    "comparison_availability",
+    "note"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "package_id": {
+      "type": "string"
+    },
+    "case_id": {
+      "type": "string"
+    },
+    "caller_summaries": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "comparison_availability": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "note": {
+      "type": "string"
+    }
+  }
+}

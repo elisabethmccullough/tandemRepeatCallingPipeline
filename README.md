@@ -4,7 +4,9 @@ A reproducible, **non-clinical** pipeline for collecting tandem-repeat evidence 
 
 ## Status and planned callers
 
-Stages 03 and 04 implement version-adapted VAMOS read and contig execution. Later callers remain planned. Normalization deliberately does not imply equivalent caller measurements.
+Stages 03–07 implement caller preparation and version-adapted execution; stage
+08 implements lossless unified evidence packaging. Normalization deliberately
+does not imply equivalent caller measurements.
 
 ## Inputs
 
@@ -56,7 +58,7 @@ The preliminary HTT file intentionally has null coordinates. Coordinates and too
 4. `03_run_vamos_read` uses the original reads; `04_run_vamos_contig` uses the assembled contig alignment.
 5. `05_run_straglr` uses original raw reads.
 6. `06_prepare_tandem_genotypes` and `07_run_tandem_genotypes` prepare and call from their required alignments.
-7. `08_normalize_outputs` maps future native results without manufacturing absent fields.
+7. `08_normalize_outputs` validates and packages caller evidence without manufacturing absent fields.
 
 Raw-read evidence reflects individual alignments and read support. Assembly-derived evidence reflects the assembled sequence and assembly/alignment process. They are complementary, not interchangeable, and provenance remains explicit in `analysis_source`.
 
@@ -64,7 +66,11 @@ Raw-read evidence reflects individual alignments and read support. Assembly-deri
 
 Source modules live in `src/tr_calling_pipeline`, entry points in `scripts`, YAML under `config`, tests under `tests`, resources under `resources`, and the future Apptainer recipe under `containers/apptainer`.
 
-Each run creates `outputs/<sample_id>_<locus_id>/` with `00_manifest`, `01_inputs`, `02_prepared_bam`, `03_assembly_alignment`, `04_vamos_read`, `05_vamos_contig`, `06_straglr`, `07_tandem_genotypes`, `08_normalized`, and `logs`. Planned native names are `vamos_read.vcf.gz`, `vamos_contig.vcf.gz`, `straglr.tsv`, `straglr.bed`, and `tandem_genotypes.txt`. Normalized results are `caller_results.tsv`, `caller_results.json`, and `normalization_warnings.tsv`; generated outputs are ignored by Git.
+Each run creates `outputs/<sample_id>_<locus_id>/` with stage-specific caller
+directories and `09_normalized_evidence`. Native filenames are adapter-specific;
+the unified outputs are `normalized-evidence.json`, `evidence-summary.json`,
+`source-registry.json`, and `validation-report.json`. Generated outputs are
+ignored by Git.
 
 ## Reproducibility and limitations
 
@@ -243,3 +249,54 @@ tr-pipeline run --config config/example.yaml --dry-run --start-stage 06_prepare_
 LAST alignment never modifies the authoritative sequence. No parental origin or
 clinical interpretation is inferred. Real integration remains pending tests on
 verified laboratory installations.
+# Stage 08: unified caller evidence
+
+`08_normalize_outputs` consumes the native-output registries, run metadata, and
+preliminary normalized evidence from VAMOS read, VAMOS contig, STRaglr, and
+tandem-genotypes, together with patient sequence metadata/FASTA and the locus
+configuration. It atomically publishes `09_normalized_evidence/normalized-evidence.json`,
+`evidence-summary.json`, `source-registry.json`, and `validation-report.json`.
+
+```bash
+tr-pipeline run \
+  --config config/example.yaml \
+  --start-stage 08_normalize_outputs \
+  --stop-stage 08_normalize_outputs
+```
+
+Planning without producing biological evidence is supported:
+
+```bash
+tr-pipeline run \
+  --config config/example.yaml \
+  --dry-run \
+  --start-stage 08_normalize_outputs \
+  --stop-stage 08_normalize_outputs
+```
+
+Dry-run inspects required patient inputs and classifies each optional caller
+artifact group as present, absent, or incomplete. It writes only
+`09_normalized_evidence_plans/dry-run-validation-report.json`; it does not
+publish a normalized evidence package or completed source registry. Validation
+failures during a real rerun are published atomically beneath
+`09_normalized_evidence_failures/` and never replace a previously completed
+package.
+
+VAMOS and STRaglr read evidence stays `RAW_READS` / `UNASSIGNED`; VAMOS
+contig and tandem-genotypes evidence stays `ASSEMBLED_CONTIG` /
+`DIRECT_SEQUENCE_ASSOCIATION`. Caller states include `AVAILABLE`,
+`NOT_APPLICABLE`, `INPUT_MISSING`, `COMPUTATION_FAILED`, `AMBIGUOUS`,
+`NOT_COMPUTED`, and `UNSUPPORTED_FORMAT`. Optional missing callers are retained
+as states rather than fabricated empty successes.
+
+The source registry retains exact native paths and checksums. Validation rejects
+identity, assignment, sequence, identifier, registry, and checksum conflicts.
+Deterministic record, source, and caller-summary ordering supports conservative
+resume: changes to caller artifacts, metadata, locus configuration, native
+files, or outputs invalidate reuse.
+
+Shared normalized fields do not imply equivalent caller measurements. No
+consensus, cross-caller reconciliation, or clinical interpretation is produced;
+native caller outputs remain authoritative and unchanged. See
+`docs/gui-handoff/task-07-unified-normalization.md` for the GUI contract and
+limitations.

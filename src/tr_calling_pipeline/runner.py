@@ -75,7 +75,11 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
             root / "06_straglr" / "straglr.tsv",
             root / "07_tandem_genotypes" / "tandem_genotypes.txt",
         ),
-        "NORMALIZED_EVIDENCE": (root / "08_normalized" / "caller_results.json",),
+        "UNIFIED_NORMALIZED_EVIDENCE": (root / "09_normalized_evidence" / "normalized-evidence.json",),
+        "UNIFIED_EVIDENCE_SUMMARY": (root / "09_normalized_evidence" / "evidence-summary.json",),
+        "UNIFIED_SOURCE_REGISTRY": (root / "09_normalized_evidence" / "source-registry.json",),
+        "UNIFIED_VALIDATION_REPORT": (root / "09_normalized_evidence" / "validation-report.json",),
+        "NORMALIZED_EVIDENCE": (root / "09_normalized_evidence" / "normalized-evidence.json",),
         "CASE_PACKAGE": (Path(config["case_package"]["package_root"]) / "case-manifest.json",),
         "VALIDATED_CASE_PACKAGE": (Path(config["case_package"]["package_root"]) / "case-manifest.json",),
     }
@@ -205,6 +209,9 @@ def _execute_implemented_stage(stage: StageDefinition, config: dict[str, Any], r
     elif stage.stage_id == "07_run_tandem_genotypes":
         from .callers.tandem_genotypes import run_tandem_genotypes_stage
         run_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite)
+    elif stage.stage_id == "08_normalize_outputs":
+        from .normalization import run_normalization_stage
+        run_normalization_stage(config, root, overwrite=overwrite)
 
 
 def _archive_invalidated(path: Path, prior: dict[str, Any], reason: ResumeReason) -> None:
@@ -235,6 +242,8 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
         prior = json.loads(record_path.read_text(encoding="utf-8")) if record_path.is_file() else None
         digest = _stage_digest(stage, config, execution_mode)
         input_paths = tuple(path for role in stage.required_input_roles for path in role_paths.get(role, ()))
+        optional_input_paths = tuple(path for role in stage.optional_input_roles for path in role_paths.get(role, ()) if path.is_file())
+        input_paths = (*input_paths, *optional_input_paths)
         if stage.stage_id == "05_run_straglr":
             # The catalog is an explicit locus resource rather than a filename-
             # inferred role. Its bytes therefore participate directly in resume.
@@ -252,6 +261,12 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             if registry_path.is_file():
                 registry = json.loads(registry_path.read_text(encoding="utf-8"))
                 input_paths = (*input_paths, *(Path(item["path"]) for item in registry.get("alignments", [])))
+        if stage.stage_id == "08_normalize_outputs":
+            for registry_path in (root / "04_vamos_read" / "vamos-read.outputs.json", root / "05_vamos_contig" / "stage-outputs.json",
+                                  root / "06_straglr" / "straglr.outputs.json", root / "08_tandem_genotypes" / "stage-outputs.json"):
+                if registry_path.is_file():
+                    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+                    input_paths = (*input_paths, *(Path(item["path"]) if Path(item["path"]).is_absolute() else (registry_path.parent / item["path"]).resolve() for item in registry.get("outputs", []) if item.get("path")))
         output_paths = tuple(path for role in stage.expected_output_roles for path in role_paths.get(role, ()))
         inputs = _identities(input_paths)
         prior_output_paths = tuple(Path(str(item["path"])) for item in (prior or {}).get("output_file_identities", []))
@@ -287,7 +302,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
 
         now = utc_now()
         effective_modes = sorted({str(tool["execution_mode"]) for tool in tools})
-        implemented = stage.order <= 7
+        implemented = stage.order <= 8
         status = StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value
         warnings = (["Dry run: biological outputs and external commands were not created."] if dry_run and implemented else
             (["Caller-specific execution is deferred; this record describes scaffold planning only."] if not implemented else []))
@@ -310,7 +325,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
-        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7):
+        if implemented and dry_run and stage.order in (3, 4, 5, 6, 7, 8):
             if stage.order == 5:
                 from .callers.straglr import run_straglr_stage
                 run_straglr_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
@@ -320,9 +335,12 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             elif stage.order == 6:
                 from .last_alignment import prepare_tandem_genotypes_stage
                 prepare_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
-            else:
+            elif stage.order == 7:
                 from .callers.tandem_genotypes import run_tandem_genotypes_stage
                 run_tandem_genotypes_stage(config, root, config_directory, overwrite=overwrite, dry_run=True)
+            else:
+                from .normalization import run_normalization_stage
+                run_normalization_stage(config, root, overwrite=overwrite, dry_run=True)
         if implemented and not dry_run:
             record["status"] = StageStatus.RUNNING.value
             record["completed_utc"] = None
@@ -345,7 +363,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
                     registry=json.loads((root/"08_tandem_genotypes"/"stage-outputs.json").read_text())
                     completed_output_paths=(*output_paths,*(Path(item["path"]) for item in registry["outputs"]))
                 record["output_file_identities"] = _identities(completed_output_paths)
-                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig", 5: root / "06_straglr", 6:root/"07_tandem_genotypes_preparation",7:root/"08_tandem_genotypes"}.get(stage.order)
+                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig", 5: root / "06_straglr", 6:root/"07_tandem_genotypes_preparation",7:root/"08_tandem_genotypes",8:root/"09_normalized_evidence"}.get(stage.order)
                 record["command_record_paths"] = [str(path) for path in sorted(execution_root.glob("**/execution-records/*.json"))] if execution_root else []
                 record["completed_utc"] = utc_now()
             except Exception as exc:
