@@ -21,3 +21,16 @@ case_package:
   package_root: ../case-packages
   comparison_panel: {panel_id: UMN_HTT_CLINICAL_COMPARATORS, panel_version: development, required: false}
 execution: {threads: 4, dry_run: false}
+
+tools:
+  samtools: {executable: samtools, required: true, execution_mode: NATIVE}
+  minimap2: {executable: minimap2, required: true, execution_mode: NATIVE}
+  vamos: {executable: vamos, required: false, execution_mode: NATIVE}
+  straglr: {executable: straglr.py, required: false, execution_mode: NATIVE}
+  lastdb: {executable: lastdb, required: false, execution_mode: NATIVE}
+  lastal: {executable: lastal, required: false, execution_mode: NATIVE}
+  tandem_genotypes: {executable: tandem-genotypes, required: false, execution_mode: NATIVE}
+container:
+  apptainer: {executable: apptainer}
+  image: null
+  binds: []

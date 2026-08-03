@@ -93,3 +93,23 @@ Case-package inventory paths are package-relative POSIX paths. Validation reject
 absolute paths, traversal, duplicate identities, unknown file references, and
 symlink escapes. Caller evidence retains raw strings and structured values and
 keeps `RAW_READS` separate from `ASSEMBLED_CONTIG`.
+
+## Execution and provenance framework
+
+External processes are represented by immutable argument-vector command specifications and executed without a shell. Tool discovery preserves configured and resolved executable identities, distinguishes required and optional tools, probes raw/normalized versions, and supports stable `NATIVE` and `APPTAINER` modes. Apptainer images, internal commands, and explicit bind mounts are retained in provenance; broad implicit mounts are never added.
+
+Each command streams separate stdout/stderr logs plus a combined convenience log under `logs/<stage>/<command>.*.log`. UTC timestamps, monotonic durations, redacted environment overrides, checksums, failures, timeouts, and output validation are atomically recorded. Existing outputs are rejected unless overwrite is explicit. Required outputs must exist and be non-empty unless declared otherwise. Timeout handling terminates the process group and retains partial diagnostics.
+
+The canonical eleven-stage registry drives selection and stage records. Resume is deliberately conservative: prior success, supported schemas, configuration/input/output checksums, tool/version/mode, and container identity must all match. Dry runs write records and logs but execute nothing. Configuration digests use canonical JSON rather than YAML formatting; stage digests include run/input and relevant tool/container configuration. Configurations without the optional `tools` and `container` sections remain valid.
+
+The scaffold runner implements stage selection and records the observable effect of every public planning option. With `--resume`, a matching successful canonical stage record is preserved and a separate `<stage>.skip.json` record reports `SKIPPED` and `RESUME_ALLOWED`; stale records are archived as `INVALIDATED` before replanning. With `--no-resume`, an existing record is a conflict unless `--overwrite` (or the run configuration's overwrite policy) permits replacement, and the replacement explicitly records `RESUME_DISABLED`. `--execution-mode` overrides configured tool modes in planning provenance. `APPTAINER` requires both a configured launcher and an existing image, whose checksum is recorded. These are scaffold-planning behaviors; the reusable execution module implements process execution, but caller-specific stage commands remain deferred.
+
+```bash
+PYTHONPATH=src python -m tr_calling_pipeline.cli validate-run-config config/example.yaml
+PYTHONPATH=src python -m tr_calling_pipeline.cli run --config config/example.yaml --dry-run
+tr-pipeline run --config config/example.yaml --dry-run
+tr-pipeline run --config config/example.yaml --resume
+tr-pipeline run --config config/example.yaml --start-stage 02_align_assembly --stop-stage 05_run_straglr
+```
+
+Caller-specific stage execution remains incomplete; the current runner plans the scaffold and emits lifecycle provenance without inventing biological parameters.

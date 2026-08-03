@@ -175,6 +175,197 @@
         }
       },
       "additionalProperties": false
+    },
+    "tools": {
+      "type": "object",
+      "properties": {
+        "samtools": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "minimap2": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "vamos": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "straglr": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "lastdb": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "lastal": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "tandem_genotypes": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "container": {
+      "type": "object",
+      "properties": {
+        "apptainer": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "binds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,
