@@ -1,0 +1,9 @@
+{
+  "record_schema_version": "1.0",
+  "stage_id": "06_prepare_tandem_genotypes",
+  "status": "SUCCEEDED",
+  "sequences": [
+    "patient-hap1",
+    "patient-hap2"
+  ]
+}

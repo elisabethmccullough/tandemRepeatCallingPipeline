@@ -1,0 +1,4 @@
+##maf version=1
+a score=42
+s chr4 100 12 + 1000 CAGCAGCAGCAG
+s patient-hap1 0 12 + 12 CAGCAGCAGCAG

@@ -1,0 +1,10 @@
+{
+  "record_schema_version": "1.0",
+  "outputs": [
+    {
+      "file_id": "tg-patient-hap1",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "associated_sequence_id": "patient-hap1"
+    }
+  ]
+}

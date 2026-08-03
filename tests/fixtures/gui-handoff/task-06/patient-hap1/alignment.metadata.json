@@ -1,0 +1,15 @@
+{
+  "record_schema_version": "1.0",
+  "sequence_id": "patient-hap1",
+  "source_fasta_record_id": "synthetic-contig-1",
+  "sequence_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "alignment_file_id": "last-patient-hap1",
+  "alignment_file_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "alignment_format": "MAF",
+  "coordinate_space": "ALIGNMENT_COORDINATES",
+  "lastdb_version": "1450",
+  "lastal_version": "1450",
+  "repeat_definition_identity": {
+    "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  }
+}
