@@ -38,6 +38,6 @@ def test_dry_run_and_stage_resume(tmp_path):
  p=tmp_path/'output'; p.write_text('x'); ident=asdict(file_identity(p)); tool=[{'tool_id':'VAMOS','resolved_executable':'/x','detected_version':'1','execution_mode':'NATIVE','container_digest':None}]
  prior={'record_schema_version':'1.0','status':'SUCCEEDED','configuration_digest':canonical_digest({'a':1}),'input_file_identities':[],'output_file_identities':[ident],'tool_identities':tool}
  assert resume_eligibility(prior,canonical_digest({'a':1}),[],[ident],tool) is ResumeReason.RESUME_ALLOWED
- p.write_text('y'); assert resume_eligibility(prior,canonical_digest({'a':1}),[],[],tool) is ResumeReason.OUTPUT_CHANGED
+ p.write_text('y'); assert resume_eligibility(prior,canonical_digest({'a':1}),[],[asdict(file_identity(p))],tool) is ResumeReason.OUTPUT_CHANGED
  assert len(select_stages('02_align_assembly','05_run_straglr'))==4
  with pytest.raises(ValueError): select_stages('05_run_straglr','02_align_assembly')

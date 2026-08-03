@@ -4,7 +4,7 @@
 
 Tool IDs are `SAMTOOLS`, `MINIMAP2`, `VAMOS`, `STRAGLR`, `LASTDB`, `LASTAL`, `TANDEM_GENOTYPES`, `PYTHON`, `PIPELINE`, and `APPTAINER`. Tool statuses are `AVAILABLE`, `MISSING_OPTIONAL`, `MISSING_REQUIRED`, `VERSION_UNDETERMINED`, `UNSUPPORTED_VERSION`, and `NOT_CHECKED`. Execution modes are `NATIVE` and `APPTAINER`. Execution statuses are `PLANNED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `TIMED_OUT`, `CANCELLED`, `DRY_RUN`, and `OUTPUT_VALIDATION_FAILED`. Stage statuses are `NOT_STARTED`, `PLANNED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `SKIPPED`, `DRY_RUN`, and `INVALIDATED`.
 
-Resume reasons are `RESUME_ALLOWED`, `NO_PRIOR_RECORD`, `PRIOR_STAGE_FAILED`, `INPUT_CHANGED`, `OUTPUT_MISSING`, `OUTPUT_CHANGED`, `CONFIGURATION_CHANGED`, `TOOL_CHANGED`, `TOOL_VERSION_CHANGED`, `EXECUTION_MODE_CHANGED`, `CONTAINER_CHANGED`, and `UNSUPPORTED_RECORD_VERSION`. Tool-status, execution-record, and stage-record schemas are version `1.0`. Enum values serialize as the strings above, never language-specific enum representations. The optional run-schema `tools` and `container` additions are pipeline-only and backward compatible at run schema `1.0`.
+Resume reasons are `RESUME_ALLOWED`, `RESUME_DISABLED`, `NO_PRIOR_RECORD`, `PRIOR_STAGE_FAILED`, `INPUT_CHANGED`, `OUTPUT_MISSING`, `OUTPUT_CHANGED`, `CONFIGURATION_CHANGED`, `TOOL_CHANGED`, `TOOL_VERSION_CHANGED`, `EXECUTION_MODE_CHANGED`, `CONTAINER_CHANGED`, and `UNSUPPORTED_RECORD_VERSION`. Tool-status, execution-record, and stage-record schemas are version `1.0`. Enum values serialize as the strings above, never language-specific enum representations. The optional run-schema `tools` and `container` additions are pipeline-only and backward compatible at run schema `1.0`.
 
 ## Pipeline artifacts available to the GUI
 
@@ -25,6 +25,8 @@ Absolute paths are workstation-specific and must not be displayed in clinical re
 ## Provisional decisions
 
 Caller-specific argument layouts, supported-version ranges, clinical relevance of execution mode, stage-to-package inventory placement, and final caller-stage output roles remain provisional. The GUI must not treat raw local paths, full command rendering, bind layout, or scaffold warnings as stable presentation fields. No evidence classification or caller precedence is introduced.
+
+The scaffold resume policy preserves a canonical successful stage record and emits a sibling `<stage>.skip.json` record for each allowed skip. Incompatible canonical records are archived with `INVALIDATED` status before a new plan is written. `RESUME_DISABLED` explicitly identifies planning performed with `--no-resume`; it is stable as a resume reason in record schema version `1.0`.
 
 ## Matching GUI work
 

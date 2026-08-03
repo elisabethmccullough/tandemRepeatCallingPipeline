@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, replace
 from enum import Enum
 from pathlib import Path
-import re, shutil, subprocess
+import os, re, shutil, subprocess
 from .provenance import sha256_file
 
 class ToolId(str, Enum):
@@ -21,7 +21,8 @@ class Tool:
 
 def resolve_tool(tool: Tool, config_directory: str|Path, path: str|None=None) -> Tool:
     configured = Path(tool.configured_executable).expanduser()
-    explicit = configured.is_absolute() or configured.parent != Path(".")
+    configured_text = tool.configured_executable
+    explicit = configured.is_absolute() or configured.parent != Path(".") or os.sep in configured_text or bool(os.altsep and os.altsep in configured_text)
     candidate = str((Path(config_directory)/configured).resolve()) if explicit and not configured.is_absolute() else str(configured)
     resolved = shutil.which(candidate, path=path) if not explicit else (str(Path(candidate).resolve()) if Path(candidate).is_file() else None)
     if resolved is None:

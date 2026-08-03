@@ -102,6 +102,8 @@ Each command streams separate stdout/stderr logs plus a combined convenience log
 
 The canonical eleven-stage registry drives selection and stage records. Resume is deliberately conservative: prior success, supported schemas, configuration/input/output checksums, tool/version/mode, and container identity must all match. Dry runs write records and logs but execute nothing. Configuration digests use canonical JSON rather than YAML formatting; stage digests include run/input and relevant tool/container configuration. Configurations without the optional `tools` and `container` sections remain valid.
 
+The scaffold runner implements stage selection and records the observable effect of every public planning option. With `--resume`, a matching successful canonical stage record is preserved and a separate `<stage>.skip.json` record reports `SKIPPED` and `RESUME_ALLOWED`; stale records are archived as `INVALIDATED` before replanning. With `--no-resume`, an existing record is a conflict unless `--overwrite` (or the run configuration's overwrite policy) permits replacement, and the replacement explicitly records `RESUME_DISABLED`. `--execution-mode` overrides configured tool modes in planning provenance. `APPTAINER` requires both a configured launcher and an existing image, whose checksum is recorded. These are scaffold-planning behaviors; the reusable execution module implements process execution, but caller-specific stage commands remain deferred.
+
 ```bash
 PYTHONPATH=src python -m tr_calling_pipeline.cli validate-run-config config/example.yaml
 PYTHONPATH=src python -m tr_calling_pipeline.cli run --config config/example.yaml --dry-run
