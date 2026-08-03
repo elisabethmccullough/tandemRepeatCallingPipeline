@@ -57,3 +57,19 @@ def validate_schemas(directory: Path | None = None) -> dict[str, object]:
             elif not ref.startswith("#") and not (root / ref.split("#", 1)[0]).is_file():
                 errors.append(f"{path.name}: missing local $ref target: {ref}")
     return {"valid": not errors, "schema_count": len(paths), "errors": errors}
+
+
+def validate_fixtures() -> dict[str, object]:
+    """Validate the installed deterministic demo fixture inventory without tools."""
+    root = files("tr_calling_pipeline").joinpath("demo_fixtures")
+    required = {"assembly.fasta", "reference.fasta", "reference.fasta.fai", "mini.bam", "mini.bam.bai",
+                "locus.yaml", "vamos-catalog.tsv", "straglr-catalog.tsv", "repeat-definition.tsv"}
+    observed = {item.name for item in root.iterdir() if item.is_file()}
+    errors = [f"missing fixture: {name}" for name in sorted(required - observed)]
+    errors.extend(f"empty fixture: {name}" for name in sorted(required & observed)
+                  if not root.joinpath(name).read_bytes())
+    if not errors:
+        from .config import load_locus_config
+        try: load_locus_config(Path(str(root.joinpath("locus.yaml"))))
+        except Exception as exc: errors.append(f"locus.yaml: {exc}")
+    return {"valid": not errors, "fixture_count": len(observed), "errors": errors}

@@ -20,7 +20,8 @@ class ConfigurationError(ValueError):
 
 
 def schema_path(name: str) -> Path:
-    return Path(__file__).resolve().parents[2] / "schemas" / name
+    from .verification import schema_directory
+    return schema_directory() / name
 
 
 def _validate_schema(data: Any, name: str) -> None:

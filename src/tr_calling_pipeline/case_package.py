@@ -357,7 +357,8 @@ def build_case_package(config: Mapping[str, Any], run_root: str | Path, *, overw
         from .case_package_validation import validate_case_package
         validation = validate_case_package(work, write_report=True)
         if not validation["valid"]:
-            raise ConfigurationError("constructed case package failed validation")
+            details = "; ".join(f"{item.get('code')}: {item.get('message')}" for item in validation.get("issues", []))
+            raise ConfigurationError(f"constructed case package failed validation: {details}")
         if destination.exists():
             backup = destination.with_name(f".{destination.name}.old-{uuid.uuid4().hex}")
             os.replace(destination, backup)

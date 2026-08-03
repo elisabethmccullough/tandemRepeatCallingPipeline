@@ -203,10 +203,17 @@
             "description": "Reported end or unavailable."
           },
           "coordinate_convention": {
-            "enum": [
-              "zero_based_half_open",
-              "one_based_closed",
-              "inter_base"
+            "anyOf": [
+              {
+                "enum": [
+                  "zero_based_half_open",
+                  "one_based_closed",
+                  "inter_base"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "reported_motif": {

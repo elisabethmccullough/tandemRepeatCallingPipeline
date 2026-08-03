@@ -11,7 +11,7 @@ from .case_package_validation import validate_case_package
 from .config import load_config, load_locus_config
 from .runner import run
 from .tools import Tool, ToolId, detect_version, resolve_tool
-from .verification import validate_schemas
+from .verification import validate_fixtures, validate_schemas
 from .readiness import check_release_readiness
 
 
@@ -24,6 +24,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     command = commands.add_parser("validate-case-package")
     command.add_argument("--package", required=True)
     commands.add_parser("validate-schemas")
+    commands.add_parser("validate-fixtures")
     commands.add_parser("check-release-readiness")
     demo = commands.add_parser("demo")
     demo.add_argument("--output", required=True)
@@ -54,6 +55,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if report["valid"] else 2
     elif args.command == "validate-schemas":
         report = validate_schemas(); print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["valid"] else 2
+    elif args.command == "validate-fixtures":
+        report = validate_fixtures(); print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["valid"] else 2
     elif args.command == "check-release-readiness":
         status, limitations = check_release_readiness(Path.cwd())

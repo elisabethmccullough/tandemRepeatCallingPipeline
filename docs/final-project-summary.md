@@ -7,7 +7,7 @@ The non-clinical pipeline accepts a patient assembly FASTA (commonly produced up
 Outputs include patient sequences, separate caller evidence, native files, provenance, warnings, checksums, and a portable GUI package. The GUI consumes `case-manifest.json` and referenced relative files, never arbitrary run-directory state.
 
 ## Current verification and remaining work
-Internal contracts and adapters have unit/fake-tool synthetic coverage. Fake executables are not real callers. No real caller installation or laboratory workflow is verified. Remaining work is controlled real-tool smoke testing, laboratory review, final HTT resource confirmation, approved real-sample evaluation, GUI integration, and clinical governance if ever pursued.
+Internal contracts and adapters have unit/fake-tool synthetic coverage. Fake executables are not real callers. No real caller installation or laboratory workflow is verified. Hosted operating-system verification exists only after the PR Actions matrix succeeds; workflow configuration alone is not evidence. Remaining work is controlled real-tool smoke testing, laboratory review, final HTT resource confirmation, approved real-sample evaluation, GUI integration, and clinical governance if ever pursued.
 
 ## Scientific limitations
-There is no interpretation, thresholding, consensus, caller preference, parent-of-origin inference, or raw-read haplotype assignment. The package is technical evidence, not a clinical report. Current status: **READY_WITH_LIMITATIONS** for continued development and synthetic handoff, not clinical use.
+There is no interpretation, thresholding, consensus, caller preference, parent-of-origin inference, or raw-read haplotype assignment. The package is technical evidence, not a clinical report. Local status is **NOT_READY** until hosted CI and clean-wheel evidence are supplied; a fully successful hosted workflow may report **READY_WITH_LIMITATIONS**, never clinical readiness.

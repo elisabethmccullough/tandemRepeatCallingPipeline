@@ -20,6 +20,7 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: python -m pytest
       - run: tr-pipeline validate-schemas
+      - run: tr-pipeline validate-fixtures
       - run: python -m compileall -q src tests scripts
       - run: python scripts/safety_scan.py
       - run: python -m pytest tests/test_runner_options.py -q
@@ -39,6 +40,20 @@ jobs:
       - run: wheel-env/bin/pip install dist/*.whl
       - run: cd /tmp && "$GITHUB_WORKSPACE/wheel-env/bin/tr-pipeline" --help
       - run: cd /tmp && "$GITHUB_WORKSPACE/wheel-env/bin/tr-pipeline" validate-schemas
+      - run: cd /tmp && "$GITHUB_WORKSPACE/wheel-env/bin/tr-pipeline" validate-fixtures
       - run: cd /tmp && "$GITHUB_WORKSPACE/wheel-env/bin/tr-pipeline" demo --output "demo output"
       - run: cd /tmp && "$GITHUB_WORKSPACE/wheel-env/bin/tr-pipeline" validate-case-package --package "demo output/portable synthetic case package"
-      - run: python scripts/check_release_readiness.py
+
+  readiness:
+    needs: [test, package]
+    runs-on: ubuntu-latest
+    env:
+      TR_PIPELINE_FULL_DEMO_VERIFIED: '1'
+      TR_PIPELINE_WHEEL_VERIFIED: '1'
+      TR_PIPELINE_HOSTED_CI_VERIFIED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install -e ".[dev]"
+      - run: tr-pipeline check-release-readiness

@@ -21,5 +21,5 @@ Verification levels are `UNIT_TESTED`, `SYNTHETIC_INTEGRATION_TESTED`, `REAL_TOO
 | Apptainer execution | Planning complete | UNIT_TESTED | argv/provenance tests; none real | Environment verification required. |
 | Resume / dry-run | Complete, conservative | UNIT_TESTED | pytest coverage; n/a | Extend full-run invalidation coverage. |
 | GUI handoff contracts | Complete for v1 contracts | SYNTHETIC_INTEGRATION_TESTED | frozen fixtures; no GUI test | GUI must not infer interpretation/consensus. |
-| CI | Implemented | UNIT_TESTED | Ubuntu/Windows, Python 3.11/3.12 configured | Hosted runs are authoritative for platforms. |
+| CI | Implemented; hosted result required | UNIT_TESTED until Actions succeeds | Ubuntu/Windows, Python 3.11/3.12 configured | Workflow configuration alone is not platform verification; inspect PR checks. |
 | Real-tool verification | Not completed | UNVERIFIED | verified versions: none | Complete controlled templates and review. |

@@ -32,7 +32,7 @@ def resolve_tool(tool: Tool, config_directory: str|Path, path: str|None=None) ->
         status = ToolStatus.MISSING_REQUIRED if tool.required else ToolStatus.MISSING_OPTIONAL
         return replace(tool, status=status, status_message="configured executable was not found")
     resolved_name = Path(resolved).name.lower()
-    kind = ExecutableKind.FAKE_TEST_TOOL if resolved_name.startswith("fake_") or "fake-tool" in resolved_name else tool.executable_kind
+    kind = ExecutableKind.FAKE_TEST_TOOL if resolved_name.startswith(("fake_", "fake-")) or "fake-tool" in resolved_name else tool.executable_kind
     verification = "SYNTHETIC_INTEGRATION_TESTED" if kind is ExecutableKind.FAKE_TEST_TOOL else tool.verification_level
     return replace(tool, resolved_executable=resolved, status=ToolStatus.AVAILABLE,
                    executable_kind=kind, verification_level=verification)

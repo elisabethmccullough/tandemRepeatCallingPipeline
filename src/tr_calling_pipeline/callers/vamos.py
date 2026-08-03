@@ -124,7 +124,8 @@ def _run_one(config, stage_id, mode, input_path, out, tool, catalog, *, sequence
     metadata["input_file_ids"]=[f"input-{sha256_file(item.path)[:16]}" for item in declared_inputs]
     try:
         execute(spec,tool,record_path,out/"logs",dry_run=False)
-        outputs=[NativeCallerOutput.from_path(p,file_id=f"{plan.command_id}-native-{i+1}",caller="VAMOS",caller_version=tool.detected_version,analysis_source=source,producer_command_id=plan.command_id) for i,p in enumerate(plan.native_outputs)]
+        identity_suffix=f"-{sequence_id}" if sequence_id else ""
+        outputs=[NativeCallerOutput.from_path(p,file_id=f"{plan.command_id}{identity_suffix}-native-{i+1}",caller="VAMOS",caller_version=tool.detected_version,analysis_source=source,producer_command_id=plan.command_id) for i,p in enumerate(plan.native_outputs)]
         normalized=[]; warnings=[development_warning]
         try:
             for item in parse_native_jsonl(Path(plan.native_outputs[0])): normalized.append(_normalized(item,config=config,version=tool.detected_version,source=outputs[0],analysis_source=source,sequence_id=sequence_id))
@@ -199,7 +200,7 @@ def run_vamos_stage(stage_id: str, config: dict[str, Any], root: Path, config_di
             atomic_write_json(out/"stage-summary.json",{"record_schema_version":"1.0","stage_id":stage_id,"runs":[*runs,failed]})
             raise
         metadata["sequence_sha256"]=task3_sequence_sha256; metadata["input_fasta_sha256"]=sha256_file(single); atomic_write_json(seqout/"run.json",metadata)
-        runs.append(metadata); all_outputs.extend(x.to_dict() for x in outputs); all_records.extend(records)
+        runs.append(metadata); all_outputs.extend({**x.to_dict(),"associated_sequence_id":sequence_id} for x in outputs); all_records.extend(records)
     atomic_write_json(out/"stage-summary.json",{"record_schema_version":"1.0","stage_id":stage_id,"runs":runs})
     atomic_write_json(out/"stage-outputs.json",{"record_schema_version":"1.0","outputs":all_outputs})
     atomic_write_json(out/"stage-normalized.json",{"record_schema_version":"1.0","evidence_state":"AVAILABLE","records":all_records,"normalization_warnings":[]})
