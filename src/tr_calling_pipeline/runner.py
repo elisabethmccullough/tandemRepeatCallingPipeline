@@ -54,8 +54,12 @@ def _role_paths(config: dict[str, Any], root: Path) -> dict[str, tuple[Path, ...
         "ASSEMBLY_RECORD_MAPPINGS": (root / "03_assembly_alignment" / "assembly_record_mappings.json",),
         "PACKAGE_PATIENT_FASTA": (root / "03_assembly_alignment" / "patient-sequences.fasta",),
         "PACKAGE_PATIENT_METADATA": (root / "03_assembly_alignment" / "patient-sequences.metadata.json",),
-        "VAMOS_READ_NATIVE_OUTPUT": (root / "04_vamos_read" / "vamos_read.vcf.gz",),
-        "VAMOS_CONTIG_NATIVE_OUTPUT": (root / "05_vamos_contig" / "vamos_contig.vcf.gz",),
+        "VAMOS_READ_NATIVE_OUTPUTS": (root / "04_vamos_read" / "vamos-read.outputs.json",),
+        "VAMOS_READ_RUN_METADATA": (root / "04_vamos_read" / "vamos-read.run.json",),
+        "VAMOS_READ_NORMALIZED_EVIDENCE": (root / "04_vamos_read" / "vamos-read.normalized.json",),
+        "VAMOS_CONTIG_NATIVE_OUTPUTS": (root / "05_vamos_contig" / "stage-outputs.json",),
+        "VAMOS_CONTIG_RUN_METADATA": (root / "05_vamos_contig" / "stage-summary.json",),
+        "VAMOS_CONTIG_NORMALIZED_EVIDENCE": (root / "05_vamos_contig" / "stage-normalized.json",),
         "STRAGLR_NATIVE_OUTPUT": (root / "06_straglr" / "straglr.tsv",),
         "TANDEM_GENOTYPES_ALIGNMENT_INPUT": (root / "07_tandem_genotypes" / "alignment.maf",),
         "TANDEM_GENOTYPES_NATIVE_OUTPUT": (root / "07_tandem_genotypes" / "tandem_genotypes.txt",),
@@ -178,6 +182,9 @@ def _execute_implemented_stage(stage: StageDefinition, config: dict[str, Any], r
         from .alignment import align_assembly
         align_assembly(config, root / "03_assembly_alignment", _native_tool(config, config_directory, "MINIMAP2"),
             _native_tool(config, config_directory, "SAMTOOLS"), overwrite=overwrite)
+    elif stage.stage_id in {"03_run_vamos_read", "04_run_vamos_contig"}:
+        from .callers.vamos import run_vamos_stage
+        run_vamos_stage(stage.stage_id, config, root, config_directory, overwrite=overwrite)
 
 
 def _archive_invalidated(path: Path, prior: dict[str, Any], reason: ResumeReason) -> None:
@@ -243,7 +250,7 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
 
         now = utc_now()
         effective_modes = sorted({str(tool["execution_mode"]) for tool in tools})
-        implemented = stage.order <= 2
+        implemented = stage.order <= 4
         status = StageStatus.DRY_RUN.value if dry_run else StageStatus.PLANNED.value
         warnings = (["Dry run: biological outputs and external commands were not created."] if dry_run and implemented else
             (["Caller-specific execution is deferred; this record describes scaffold planning only."] if not implemented else []))
@@ -266,6 +273,9 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
             "resume_eligibility": {"eligible": False, "reason": reason.value},
         }
         atomic_write_json(record_path, record)
+        if implemented and dry_run and stage.order in (3, 4):
+            from .callers.vamos import run_vamos_stage
+            run_vamos_stage(stage.stage_id, config, root, config_directory, overwrite=overwrite, dry_run=True)
         if implemented and not dry_run:
             record["status"] = StageStatus.RUNNING.value
             record["completed_utc"] = None
@@ -277,9 +287,8 @@ def run(config_path, *, dry_run=False, start_stage=None, stop_stage=None, resume
                     raise RuntimeError(f"stage required outputs are missing or empty: {', '.join(missing)}")
                 record["status"] = StageStatus.SUCCEEDED.value
                 record["output_file_identities"] = _identities(output_paths)
-                record["command_record_paths"] = [str(path) for path in sorted(
-                    (root / ("02_prepared_bam" if stage.order == 1 else "03_assembly_alignment") / "execution-records").glob("*.json")
-                )] if stage.order in (1, 2) else []
+                execution_root = {1: root / "02_prepared_bam", 2: root / "03_assembly_alignment", 3: root / "04_vamos_read", 4: root / "05_vamos_contig"}.get(stage.order)
+                record["command_record_paths"] = [str(path) for path in sorted(execution_root.glob("**/execution-records/*.json"))] if execution_root else []
                 record["completed_utc"] = utc_now()
             except Exception as exc:
                 record["status"] = StageStatus.FAILED.value

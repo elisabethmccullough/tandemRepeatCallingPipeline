@@ -1,0 +1,31 @@
+{
+  "record_schema_version": "1.0",
+  "run_id": "fixture-reads",
+  "stage_id": "03_run_vamos_read",
+  "caller": "VAMOS",
+  "caller_version": "2.1.0",
+  "raw_version_output": "VAMOS 2.1.0\n",
+  "analysis_source": "RAW_READS",
+  "associated_sequence_id": null,
+  "source_fasta_record_id": null,
+  "assignment_state": "UNASSIGNED",
+  "status": "TOOL_MISSING",
+  "command_record_paths": [
+    "execution-records/command.json"
+  ],
+  "input_file_ids": [
+    "fixture-input"
+  ],
+  "native_output_file_ids": [
+    "fixture-native"
+  ],
+  "catalog_identity": {
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "started_utc": "2026-01-01T00:00:00Z",
+  "completed_utc": "2026-01-01T00:00:01Z",
+  "warnings": [
+    "TOOL_MISSING"
+  ],
+  "failure": null
+}

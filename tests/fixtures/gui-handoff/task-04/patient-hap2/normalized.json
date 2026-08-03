@@ -1,0 +1,48 @@
+{
+  "record_schema_version": "1.0",
+  "evidence_state": "AVAILABLE",
+  "records": [
+    {
+      "record_schema_version": "1.0",
+      "record_id": "vamos-patient-hap2-1",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "synthetic-locus",
+      "caller": "VAMOS",
+      "caller_version": "2.1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "source_file_id": "read-native",
+      "source_file_sha256": "12b6f90cff0028962c76e9e3297eaef8643abd7c7ed5db7ad075918f12f751cb",
+      "native_record_identifier": "synthetic-locus",
+      "native_allele_identifier": "contig-consensus",
+      "associated_sequence_id": "patient-hap2",
+      "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+      "reference_build": "GRCh38",
+      "chromosome": "chr4",
+      "start": 3074876,
+      "end": 3074933,
+      "coordinate_convention": "zero_based_half_open",
+      "reported_motif": "CAG",
+      "reported_motif_chain": [
+        {
+          "motif": "CAG",
+          "count": "19"
+        }
+      ],
+      "reported_repeat_count": "19",
+      "reported_repeat_length_bp": "57",
+      "supporting_reads": null,
+      "total_spanning_reads": null,
+      "quality_state": "NOT_APPLICABLE",
+      "raw_fields": {
+        "record_id": "synthetic-locus",
+        "allele_id": "contig-consensus",
+        "repeat_count": "19",
+        "caller_only": "retained"
+      },
+      "normalization_warnings": []
+    }
+  ],
+  "normalization_warnings": []
+}

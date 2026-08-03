@@ -1,0 +1,17 @@
+{
+  "record_schema_version": "1.0",
+  "outputs": [
+    {
+      "file_id": "fixture-native",
+      "role": "NATIVE_CALLER_OUTPUT",
+      "path": "native/patient-hap1.jsonl",
+      "media_type": "application/jsonl",
+      "sha256": "12b6f90cff0028962c76e9e3297eaef8643abd7c7ed5db7ad075918f12f751cb",
+      "size_bytes": 804,
+      "caller": "VAMOS",
+      "caller_version": "2.1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "producer_command_id": "fixture-command"
+    }
+  ]
+}

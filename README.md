@@ -1,10 +1,10 @@
 # tandemRepeatCallingPipeline
 
-A reproducible, **non-clinical** pipeline scaffold for comparing tandem-repeat calls from a local assembly and its original coordinate-sorted mini-BAM. No external caller is installed or executed yet; commands, directories, validation, manifests, and a common output contract are established for development.
+A reproducible, **non-clinical** pipeline for collecting tandem-repeat evidence from a local assembly and its original coordinate-sorted mini-BAM.
 
 ## Status and planned callers
 
-The scaffold plans VAMOS in read and contig modes, STRaglr on raw reads, and tandem-genotypes after LAST-based preparation. Implementations currently log placeholders rather than invoking these tools. The normalizer writes an empty stable schema; it deliberately does not imply that callers expose equivalent measurements.
+Stages 03 and 04 implement version-adapted VAMOS read and contig execution. Later callers remain planned. Normalization deliberately does not imply equivalent caller measurements.
 
 ## Inputs
 
@@ -165,3 +165,16 @@ Resume identities include source/output checksums, alignment configuration, and 
 versions. Dry runs create planning/lifecycle records but no BAM or FASTA outputs.
 Motif parsing, anchor projection, caller execution, caller allele assignment, clinical
 metrics, and clinical interpretation remain intentionally outside this work.
+
+## VAMOS execution (stages 03–04)
+
+VAMOS is not installed automatically. Configure its executable and whether it is required under `tools.vamos`. Catalogs are explicit in the locus configuration (`repeat_catalog`, or separate `read_catalog` and `contig_catalog`) and resolve relative to that file; the pipeline never searches for a substitute. Missing optional tools produce `TOOL_MISSING` metadata; missing required tools fail. Missing catalogs and unsupported versions have explicit statuses.
+
+No real VAMOS release is currently declared supported. The isolated provisional adapter is disabled by default; setting `tools.vamos.allow_provisional_adapter: true` is a development-only opt-in for fake-tool testing with 2.x-shaped version strings. Its syntax still requires verification against the laboratory's installed VAMOS. Every declared native output remains unchanged with checksum, size, caller version, and command provenance. The known JSONL fixture format is normalized losslessly; unrecognized formats remain available and report `UNSUPPORTED_FORMAT`.
+
+Read-derived alleles remain `UNASSIGNED`; allele order is never mapped to patient haplotypes. Assembly records are directly associated with the exact source sequence. VAMOS does not replace the patient FASTA, results are not averaged, and no clinical interpretation is performed. Resume compares input, output, configuration, catalog, and tool-version identities conservatively.
+
+```bash
+tr-pipeline run --config config/example.yaml --start-stage 03_run_vamos_read --stop-stage 04_run_vamos_contig
+tr-pipeline run --config config/example.yaml --dry-run --start-stage 03_run_vamos_read --stop-stage 04_run_vamos_contig
+```

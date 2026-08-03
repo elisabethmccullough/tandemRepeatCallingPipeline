@@ -25,7 +25,8 @@ execution: {threads: 4, dry_run: false}
 tools:
   samtools: {executable: samtools, required: true, execution_mode: NATIVE}
   minimap2: {executable: minimap2, required: true, execution_mode: NATIVE}
-  vamos: {executable: vamos, required: false, execution_mode: NATIVE}
+  # Development-only: keep false until the laboratory VAMOS syntax is verified.
+  vamos: {executable: vamos, required: false, execution_mode: NATIVE, allow_provisional_adapter: false, additional_arguments: []}
   straglr: {executable: straglr.py, required: false, execution_mode: NATIVE}
   lastdb: {executable: lastdb, required: false, execution_mode: NATIVE}
   lastal: {executable: lastal, required: false, execution_mode: NATIVE}
