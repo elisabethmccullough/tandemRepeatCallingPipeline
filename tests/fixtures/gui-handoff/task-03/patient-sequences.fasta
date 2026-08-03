@@ -1,0 +1,8 @@
+>patient-forward
+ACGTACGTACGT
+>patient-reverse
+TTGCAACGTTAA
+>patient-consensus
+acgtryN
+>patient-unmapped
+NNNNACGT

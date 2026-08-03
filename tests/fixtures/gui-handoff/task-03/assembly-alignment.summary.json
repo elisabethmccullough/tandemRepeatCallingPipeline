@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "alignment_configuration": {
+    "minimap2_preset": "asm20",
+    "secondary": true,
+    "threads": 4
+  },
+  "sequence_count": 3,
+  "mapping_status_counts": {
+    "UNIQUE_PRIMARY": 2,
+    "UNMAPPED": 1
+  },
+  "warnings": [
+    "synthetic fixture; asm20 is a development default"
+  ]
+}

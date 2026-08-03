@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "patient_fasta_path": "patient-sequences.fasta",
+  "patient_fasta_sha256": "b656e5733bf5655e842946c3e1e41af9761348a1ada90be452ec9065c2c69ac2",
+  "sequences": [
+    {
+      "record_schema_version": "1.0",
+      "sequence_id": "patient-forward",
+      "sequence_role": "PATIENT_HAPLOTYPE",
+      "display_label": "Patient Forward",
+      "source_fasta_path": "synthetic/assembly.fasta",
+      "source_fasta_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source_fasta_record_id": "PATIENT_FORWARD",
+      "sequence_sha256": "5c6a650ff081787232ffc2057ac5b923e9337eb04b2653eb4a7d702ea3d20ba7",
+      "sequence_length": 12,
+      "original_orientation": "AS_STORED",
+      "reference_alignment_strand": "FORWARD",
+      "display_orientation": "REFERENCE_FORWARD",
+      "reverse_complement_required": false,
+      "source_coordinates": null,
+      "mapping_status": "UNIQUE_PRIMARY",
+      "warnings": []
+    },
+    {
+      "record_schema_version": "1.0",
+      "sequence_id": "patient-reverse",
+      "sequence_role": "PATIENT_HAPLOTYPE",
+      "display_label": "Patient Reverse",
+      "source_fasta_path": "synthetic/assembly.fasta",
+      "source_fasta_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source_fasta_record_id": "PATIENT_REVERSE",
+      "sequence_sha256": "a725d61070410750979a427f544816e0565e2d56f1402a9c5d7002241470e712",
+      "sequence_length": 12,
+      "original_orientation": "AS_STORED",
+      "reference_alignment_strand": "REVERSE",
+      "display_orientation": "REFERENCE_FORWARD",
+      "reverse_complement_required": true,
+      "source_coordinates": null,
+      "mapping_status": "UNIQUE_PRIMARY",
+      "warnings": []
+    },
+    {
+      "record_schema_version": "1.0",
+      "sequence_id": "patient-consensus",
+      "sequence_role": "PATIENT_CONSENSUS",
+      "display_label": "Patient Consensus",
+      "source_fasta_path": "synthetic/assembly.fasta",
+      "source_fasta_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source_fasta_record_id": "PATIENT_CONSENSUS",
+      "sequence_sha256": "02a43cf9a42c04bf43f92f693b0a1acbbf62bf57117ffcd234990e5643057fa7",
+      "sequence_length": 7,
+      "original_orientation": "AS_STORED",
+      "reference_alignment_strand": "UNKNOWN",
+      "display_orientation": "UNRESOLVED",
+      "reverse_complement_required": null,
+      "source_coordinates": null,
+      "mapping_status": "NOT_ALIGNED",
+      "warnings": []
+    },
+    {
+      "record_schema_version": "1.0",
+      "sequence_id": "patient-unmapped",
+      "sequence_role": "PATIENT_HAPLOTYPE",
+      "display_label": "Patient Unmapped",
+      "source_fasta_path": "synthetic/assembly.fasta",
+      "source_fasta_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source_fasta_record_id": "PATIENT_UNMAPPED",
+      "sequence_sha256": "9088ba6f378fb9ca6181778a678e89c6a9db7fa06e7336019b54e75722118faa",
+      "sequence_length": 8,
+      "original_orientation": "AS_STORED",
+      "reference_alignment_strand": "UNKNOWN",
+      "display_orientation": "UNRESOLVED",
+      "reverse_complement_required": null,
+      "source_coordinates": null,
+      "mapping_status": "UNMAPPED",
+      "warnings": [
+        "synthetic unmapped example"
+      ]
+    }
+  ]
+}

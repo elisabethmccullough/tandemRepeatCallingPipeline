@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "sequences"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "sequences": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sequence"
+      }
+    }
+  },
+  "$defs": {
+    "sequence": {
+      "type": "object",
+      "required": [
+        "record_schema_version",
+        "sequence_id",
+        "sequence_role",
+        "display_label",
+        "source_fasta_record_id",
+        "sequence_sha256",
+        "sequence_length",
+        "original_orientation",
+        "reference_alignment_strand",
+        "display_orientation",
+        "reverse_complement_required",
+        "source_coordinates",
+        "mapping_status",
+        "warnings"
+      ],
+      "properties": {
+        "record_schema_version": {
+          "const": "1.0"
+        },
+        "sequence_id": {
+          "type": "string"
+        },
+        "sequence_role": {
+          "enum": [
+            "PATIENT_HAPLOTYPE",
+            "PATIENT_CONSENSUS"
+          ]
+        },
+        "display_label": {
+          "type": "string"
+        },
+        "source_fasta_record_id": {
+          "type": "string"
+        },
+        "sequence_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sequence_length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "original_orientation": {
+          "const": "AS_STORED"
+        },
+        "reference_alignment_strand": {
+          "enum": [
+            "FORWARD",
+            "REVERSE",
+            "UNKNOWN",
+            "NOT_ALIGNED"
+          ]
+        },
+        "display_orientation": {
+          "enum": [
+            "REFERENCE_FORWARD",
+            "UNRESOLVED"
+          ]
+        },
+        "reverse_complement_required": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "source_coordinates": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "mapping_status": {
+          "enum": [
+            "UNIQUE_PRIMARY",
+            "MULTIPLE_PRIMARY",
+            "UNMAPPED",
+            "AMBIGUOUS",
+            "TRUNCATED",
+            "SECONDARY_ONLY",
+            "SUPPLEMENTARY_ONLY",
+            "NOT_ALIGNED"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

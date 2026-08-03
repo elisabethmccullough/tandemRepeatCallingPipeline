@@ -113,3 +113,46 @@ tr-pipeline run --config config/example.yaml --start-stage 02_align_assembly --s
 ```
 
 Caller-specific stage execution remains incomplete; the current runner plans the scaffold and emits lifecycle provenance without inventing biological parameters.
+# Task 3 inputs, BAM preparation, and assembly alignment
+
+The first three stages now validate immutable configured inputs, prepare a stage-local
+coordinate-sorted mini-BAM, and align configured patient assembly records. Inputs are
+explicit: assembly FASTA records, BAM and its configured index, reference FASTA and
+FAI, and a locus configuration. No nearby file is discovered by filename.
+
+`inputs.assembly_records` accepts one or more explicitly selected
+`PATIENT_HAPLOTYPE` and/or `PATIENT_CONSENSUS` records. It does not require two
+haplotypes and labels such as HAP1/HAP2 do not imply parent or caller allele identity.
+FASTA uses the documented IUPAC DNA alphabet `ACGTRYSWKMBDHVN`; letters are retained
+exactly, while the biological sequence SHA-256 hashes uppercase, unwrapped letters.
+Reference FASTA names and lengths must exactly agree with the configured FAI.
+`inputs.reference_scope` may explicitly be `WHOLE_GENOME_REFERENCE`,
+`LOCAL_LOCUS_REFERENCE`, or `UNKNOWN_REFERENCE_SCOPE` (the backward-compatible
+default).
+
+Stage 01 runs samtools quickcheck, header, flagstat, and idxstats checks. A valid
+coordinate-sorted source and index are hard-linked when possible and copied otherwise;
+other sort orders are sorted and newly indexed. Sources are never changed. Stage 02
+uses separate minimap2, samtools view, sort, and index commands, each with execution
+provenance. Its default `asm20` preset is a **development default pending biological
+validation**, configurable through `assembly_alignment` with `secondary` and `threads`.
+
+The authoritative `patient-sequences.fasta` contains selected sequence letters exactly
+as stored (apart from deterministic 80-column wrapping) under stable `sequence_id`
+headers. Alignment never rewrites or reverse-complements it. Reverse mappings set
+`reverse_complement_required: true`; a consumer may transform dynamically for a
+reference-forward display. Reverse strand does not imply parental origin. Unresolved
+records remain visible with explicit mapping states: `UNIQUE_PRIMARY`,
+`MULTIPLE_PRIMARY`, `UNMAPPED`, `AMBIGUOUS`, `TRUNCATED`, `SECONDARY_ONLY`, and
+`SUPPLEMENTARY_ONLY`; pre-alignment metadata uses `NOT_ALIGNED`.
+
+```bash
+tr-pipeline validate-run-config config/example.yaml
+tr-pipeline run --config config/example.yaml --start-stage 00_validate_inputs --stop-stage 02_align_assembly
+tr-pipeline run --config config/example.yaml --dry-run --start-stage 00_validate_inputs --stop-stage 02_align_assembly
+```
+
+Resume identities include source/output checksums, alignment configuration, and tool
+versions. Dry runs create planning/lifecycle records but no BAM or FASTA outputs.
+Motif parsing, anchor projection, caller execution, caller allele assignment, clinical
+metrics, and clinical interpretation remain intentionally outside this work.

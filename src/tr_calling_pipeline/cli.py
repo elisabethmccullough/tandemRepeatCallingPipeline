@@ -25,6 +25,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     command.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
     command.add_argument("--overwrite", action="store_true")
     command.add_argument("--execution-mode", choices=("NATIVE", "APPTAINER"))
+    for name in ("validate-inputs", "prepare-bam", "align-assembly"):
+        focused = commands.add_parser(name)
+        focused.add_argument("--config", required=True)
+        focused.add_argument("--dry-run", action="store_true")
+        focused.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
     if args.command == "validate-run-config":
         load_config(args.path)
@@ -34,6 +39,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         validate_case_package(args.path)
     elif args.command == "print-resolved-config":
         print(json.dumps(load_config(args.path), indent=2, sort_keys=True))
-    else:
+    elif args.command == "run":
         print(run(args.config,dry_run=args.dry_run,start_stage=args.start_stage,stop_stage=args.stop_stage,resume=args.resume,overwrite=args.overwrite,execution_mode=args.execution_mode))
+    else:
+        stage = {"validate-inputs":"00_validate_inputs", "prepare-bam":"01_prepare_bam", "align-assembly":"02_align_assembly"}[args.command]
+        print(run(args.config, dry_run=args.dry_run, start_stage=stage, stop_stage=stage, resume=True, overwrite=args.overwrite))
     return 0
