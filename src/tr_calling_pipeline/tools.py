@@ -11,12 +11,15 @@ class ToolId(str, Enum):
 class ToolStatus(str, Enum):
     AVAILABLE="AVAILABLE"; MISSING_OPTIONAL="MISSING_OPTIONAL"; MISSING_REQUIRED="MISSING_REQUIRED"; VERSION_UNDETERMINED="VERSION_UNDETERMINED"; UNSUPPORTED_VERSION="UNSUPPORTED_VERSION"; NOT_CHECKED="NOT_CHECKED"
 class ExecutionMode(str, Enum): NATIVE="NATIVE"; APPTAINER="APPTAINER"
+class ExecutableKind(str, Enum): REAL_TOOL="REAL_TOOL"; FAKE_TEST_TOOL="FAKE_TEST_TOOL"; UNKNOWN="UNKNOWN"
 
 @dataclass(frozen=True)
 class Tool:
     tool_id: ToolId; display_name: str; configured_executable: str; required: bool=False
     resolved_executable: str|None=None; detected_version: str|None=None; raw_version_output: str|None=None
     execution_mode: ExecutionMode=ExecutionMode.NATIVE; status: ToolStatus=ToolStatus.NOT_CHECKED; status_message: str|None=None
+    executable_kind: ExecutableKind=ExecutableKind.UNKNOWN; verification_level: str="UNVERIFIED"
+    adapter_name: str|None=None; adapter_classification: str|None=None
     def to_dict(self): return {k:(v.value if isinstance(v, Enum) else v) for k,v in asdict(self).items()}
 
 def resolve_tool(tool: Tool, config_directory: str|Path, path: str|None=None) -> Tool:
@@ -28,7 +31,11 @@ def resolve_tool(tool: Tool, config_directory: str|Path, path: str|None=None) ->
     if resolved is None:
         status = ToolStatus.MISSING_REQUIRED if tool.required else ToolStatus.MISSING_OPTIONAL
         return replace(tool, status=status, status_message="configured executable was not found")
-    return replace(tool, resolved_executable=resolved, status=ToolStatus.AVAILABLE)
+    resolved_name = Path(resolved).name.lower()
+    kind = ExecutableKind.FAKE_TEST_TOOL if resolved_name.startswith(("fake_", "fake-")) or "fake-tool" in resolved_name else tool.executable_kind
+    verification = "SYNTHETIC_INTEGRATION_TESTED" if kind is ExecutableKind.FAKE_TEST_TOOL else tool.verification_level
+    return replace(tool, resolved_executable=resolved, status=ToolStatus.AVAILABLE,
+                   executable_kind=kind, verification_level=verification)
 
 def detect_version(tool: Tool, arguments: tuple[str,...]=( "--version",), pattern: str=r"(?i)(?:version\s*)?v?([0-9]+(?:\.[0-9A-Za-z_-]+)+)", accepted_exit_codes: tuple[int,...]=(0,1)) -> Tool:
     if not tool.resolved_executable: return tool

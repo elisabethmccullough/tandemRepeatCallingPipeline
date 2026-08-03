@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/case-package-manifest.schema.json",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": ["record_schema_version", "package_contract_version", "package_id", "case_id", "subject_id", "sample_id", "locus_id", "created_utc", "patient", "evidence", "native_sources", "alignments", "reads", "provenance", "config", "files", "warnings", "limitations"],
+  "properties": {
+    "record_schema_version": {"const": "1.0"}, "package_contract_version": {"const": "1.0"},
+    "package_id": {"type": "string", "pattern": "^case-[a-f0-9]{24}$"},
+    "case_id": {"type": "string", "minLength": 1}, "subject_id": {"type": "string", "minLength": 1},
+    "sample_id": {"type": "string", "minLength": 1}, "locus_id": {"type": "string", "minLength": 1},
+    "created_utc": {"type": "string"}, "patient": {"type": "object"}, "evidence": {"type": "object"},
+    "native_sources": {"type": "array"}, "alignments": {"type": "array"}, "reads": {"type": "array"},
+    "provenance": {"type": "object"}, "config": {"type": "object"},
+    "files": {"type": "array", "items": {"$ref": "#/$defs/file"}},
+    "warnings": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false,
+  "$defs": {"nullableString": {"type": ["string", "null"]}, "file": {
+    "type": "object", "required": ["file_id", "role", "relative_path", "media_type", "sha256", "size_bytes", "required", "source_stage", "source_file_id", "source_path", "caller", "analysis_source", "associated_sequence_id"],
+    "properties": {"file_id": {"type": "string"}, "role": {"type": "string"}, "relative_path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"}, "media_type": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "size_bytes": {"type": "integer", "minimum": 0}, "required": {"type": "boolean"}, "source_stage": {"$ref": "#/$defs/nullableString"}, "source_file_id": {"$ref": "#/$defs/nullableString"}, "source_path": {"$ref": "#/$defs/nullableString"}, "caller": {"$ref": "#/$defs/nullableString"}, "analysis_source": {"$ref": "#/$defs/nullableString"}, "associated_sequence_id": {"$ref": "#/$defs/nullableString"}}, "additionalProperties": false
+  }}
+}

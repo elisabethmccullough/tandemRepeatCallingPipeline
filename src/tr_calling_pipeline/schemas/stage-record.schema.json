@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "record_schema_version",
+    "stage_id",
+    "status",
+    "configuration_digest",
+    "resume_eligibility"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "status": {
+      "enum": [
+        "NOT_STARTED",
+        "PLANNED",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+        "SKIPPED",
+        "DRY_RUN",
+        "INVALIDATED"
+      ]
+    },
+    "execution_mode": {
+      "enum": ["NATIVE", "APPTAINER"]
+    },
+    "overwrite": {
+      "type": "boolean"
+    },
+    "resume_eligibility": {
+      "type": "object",
+      "required": ["eligible", "reason"],
+      "properties": {
+        "eligible": {"type": "boolean"},
+        "reason": {
+          "enum": ["RESUME_ALLOWED", "RESUME_DISABLED", "NO_PRIOR_RECORD", "PRIOR_STAGE_FAILED", "INPUT_CHANGED", "OUTPUT_MISSING", "OUTPUT_CHANGED", "CONFIGURATION_CHANGED", "TOOL_CHANGED", "TOOL_VERSION_CHANGED", "EXECUTION_MODE_CHANGED", "CONTAINER_CHANGED", "UNSUPPORTED_RECORD_VERSION"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/straglr-run-metadata.schema.json",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "record_schema_version",
+    "run_id",
+    "stage_id",
+    "caller",
+    "caller_version",
+    "raw_version_output",
+    "analysis_source",
+    "associated_sequence_id",
+    "assignment_state",
+    "status",
+    "command_record_paths",
+    "input_file_ids",
+    "native_output_file_ids",
+    "catalog_identity",
+    "started_utc",
+    "completed_utc",
+    "warnings",
+    "failure",
+    "caller_resource_settings"
+  ],
+  "properties": {
+    "record_schema_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "stage_id": {
+      "const": "05_run_straglr"
+    },
+    "caller": {
+      "const": "STRAGLR"
+    },
+    "caller_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_version_output": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "analysis_source": {
+      "const": "RAW_READS"
+    },
+    "associated_sequence_id": {
+      "type": "null"
+    },
+    "assignment_state": {
+      "const": "UNASSIGNED"
+    },
+    "status": {
+      "enum": [
+        "PLANNED",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+        "DRY_RUN",
+        "TOOL_MISSING",
+        "INPUT_MISSING",
+        "UNSUPPORTED_VERSION",
+        "UNSUPPORTED_FORMAT"
+      ]
+    },
+    "command_record_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "input_file_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "native_output_file_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "catalog_identity": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "started_utc": {
+      "type": "string"
+    },
+    "completed_utc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failure": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "caller_resource_settings": {
+      "type": "object",
+      "required": [
+        "allow_provisional_adapter",
+        "additional_arguments"
+      ],
+      "properties": {
+        "allow_provisional_adapter": {
+          "type": "boolean"
+        },
+        "additional_arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

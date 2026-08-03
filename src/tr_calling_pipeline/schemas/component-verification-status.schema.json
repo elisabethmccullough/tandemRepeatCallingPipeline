@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tandem-repeat-pipeline.example/schemas/component-verification-status-1.0.json",
+  "title": "Component verification status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_schema_version", "component_id", "component_type", "implementation_status", "verification_level", "verified_versions", "test_evidence", "known_limitations", "required_follow_up", "updated_utc"],
+  "properties": {
+    "record_schema_version": {"const": "1.0"},
+    "component_id": {"type": "string", "minLength": 1},
+    "component_type": {"enum": ["PIPELINE_COMPONENT", "TOOL_ADAPTER", "NATIVE_OUTPUT_PARSER", "SCHEMA", "CASE_PACKAGE_CONTRACT", "GUI_FIXTURE"]},
+    "implementation_status": {"enum": ["IMPLEMENTED", "DEVELOPMENT_GATED", "PARTIAL", "NOT_IMPLEMENTED"]},
+    "verification_level": {"enum": ["UNIT_TESTED", "SYNTHETIC_INTEGRATION_TESTED", "REAL_TOOL_SMOKE_TESTED", "LABORATORY_VERIFIED", "UNVERIFIED"]},
+    "verified_versions": {"type": "array", "items": {"type": "string"}},
+    "test_evidence": {"type": "array", "items": {"type": "string"}},
+    "known_limitations": {"type": "array", "items": {"type": "string"}},
+    "required_follow_up": {"type": "array", "items": {"type": "string"}},
+    "updated_utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T"}
+  }
+}

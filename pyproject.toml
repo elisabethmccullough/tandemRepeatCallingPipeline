@@ -8,15 +8,41 @@ version = "0.1.0"
 description = "Reproducible scaffold for tandem-repeat caller orchestration"
 requires-python = ">=3.11"
 dependencies = ["PyYAML>=6.0"]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4"]
+dev = ["pytest>=7.4,<9", "build>=1,<2", "ruff>=0.5,<1"]
 
 [project.scripts]
 tr-pipeline = "tr_calling_pipeline.cli:main"
+fake-samtools = "tr_calling_pipeline.fake_tools:main"
+fake-minimap2 = "tr_calling_pipeline.fake_tools:main"
+fake-vamos = "tr_calling_pipeline.fake_tools:main"
+fake-straglr = "tr_calling_pipeline.fake_tools:main"
+fake-lastdb = "tr_calling_pipeline.fake_tools:main"
+fake-lastal = "tr_calling_pipeline.fake_tools:main"
+fake-tandem-genotypes = "tr_calling_pipeline.fake_tools:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+tr_calling_pipeline = ["schemas/*.schema.json", "demo_fixtures/*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 140
+
+[tool.ruff.lint]
+select = ["E9", "F"]

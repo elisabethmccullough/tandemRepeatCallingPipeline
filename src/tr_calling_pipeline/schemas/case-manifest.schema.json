@@ -1,0 +1,720 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/case-manifest.schema.json",
+  "title": "GUI case manifest",
+  "description": "Portable one-or-more-locus evidence package inventory and provenance contract.",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "case_id",
+    "subject_id",
+    "package_created_utc",
+    "pipeline",
+    "loci",
+    "files",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "subject_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "package_created_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pipeline": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "git_commit"
+      ],
+      "properties": {
+        "name": {
+          "const": "tandemRepeatCallingPipeline"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_commit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{7,40}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Source commit, or null outside a Git checkout."
+        }
+      },
+      "additionalProperties": false
+    },
+    "loci": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/locusAssessment"
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fileInventoryItem"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sourceCoordinates": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "coordinate_convention"
+      ],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coordinate_convention": {
+          "enum": [
+            "zero_based_half_open",
+            "one_based_closed",
+            "inter_base"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "patientSequence": {
+      "type": "object",
+      "required": [
+        "sequence_id",
+        "sequence_role",
+        "display_label",
+        "source_fasta_file_id",
+        "source_fasta_record_id",
+        "sequence_sha256",
+        "original_orientation",
+        "reference_alignment_strand",
+        "display_orientation",
+        "source_coordinates"
+      ],
+      "properties": {
+        "sequence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "sequence_role": {
+          "enum": [
+            "PATIENT_HAPLOTYPE",
+            "PATIENT_CONSENSUS",
+            "REFERENCE_SEQUENCE",
+            "COMPARISON_SEQUENCE"
+          ]
+        },
+        "display_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_fasta_file_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "source_fasta_record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Lowercase SHA-256 digest."
+        },
+        "original_orientation": {
+          "enum": [
+            "AS_STORED"
+          ]
+        },
+        "reference_alignment_strand": {
+          "enum": [
+            "FORWARD",
+            "REVERSE",
+            "UNKNOWN",
+            "NOT_ALIGNED"
+          ]
+        },
+        "display_orientation": {
+          "enum": [
+            "AS_STORED",
+            "REFERENCE_FORWARD"
+          ]
+        },
+        "source_coordinates": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sourceCoordinates"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Coordinates within source record, or explicit unavailable."
+        }
+      },
+      "additionalProperties": false
+    },
+    "nativeCallerOutput": {
+      "type": "object",
+      "required": [
+        "caller",
+        "caller_version",
+        "analysis_source",
+        "file_id",
+        "status"
+      ],
+      "properties": {
+        "caller": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caller_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "analysis_source": {
+          "enum": [
+            "RAW_READS",
+            "ASSEMBLED_CONTIG"
+          ]
+        },
+        "file_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "status": {
+          "enum": [
+            "AVAILABLE",
+            "NOT_APPLICABLE",
+            "INPUT_MISSING",
+            "COMPUTATION_FAILED",
+            "AMBIGUOUS",
+            "NOT_COMPUTED",
+            "UNSUPPORTED_FORMAT"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "fileInventoryItem": {
+      "type": "object",
+      "required": [
+        "file_id",
+        "role",
+        "path",
+        "required",
+        "status",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "producer_stage"
+      ],
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$",
+          "description": "Package-relative POSIX path without traversal."
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "AVAILABLE",
+            "NOT_APPLICABLE",
+            "INPUT_MISSING",
+            "COMPUTATION_FAILED",
+            "AMBIGUOUS",
+            "NOT_COMPUTED",
+            "UNSUPPORTED_FORMAT"
+          ]
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "Lowercase SHA-256 digest."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Checksum when file is available."
+        },
+        "size_bytes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size when file is available."
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producer_stage": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "locusAssessment": {
+      "type": "object",
+      "required": [
+        "locus_id",
+        "reference_build",
+        "assembly_accession",
+        "locus_config",
+        "comparison_panel",
+        "patient_sequences",
+        "native_caller_outputs",
+        "normalized_evidence",
+        "required_evidence",
+        "optional_evidence",
+        "warnings"
+      ],
+      "properties": {
+        "locus_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "reference_build": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assembly_accession": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locus_config": {
+          "type": "object",
+          "required": [
+            "config_id",
+            "version",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "config_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+              "description": "Safe, non-empty serialized identifier."
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$",
+              "description": "Package-relative POSIX path without traversal."
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "Lowercase SHA-256 digest."
+            }
+          },
+          "additionalProperties": false
+        },
+        "comparison_panel": {
+          "type": "object",
+          "required": [
+            "panel_id",
+            "panel_version"
+          ],
+          "properties": {
+            "panel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+              "description": "Safe, non-empty serialized identifier."
+            },
+            "panel_version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "patient_sequences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/patientSequence"
+          }
+        },
+        "native_caller_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nativeCallerOutput"
+          }
+        },
+        "normalized_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRecord"
+          }
+        },
+        "required_evidence": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "AVAILABLE",
+              "NOT_APPLICABLE",
+              "INPUT_MISSING",
+              "COMPUTATION_FAILED",
+              "AMBIGUOUS",
+              "NOT_COMPUTED",
+              "UNSUPPORTED_FORMAT"
+            ]
+          }
+        },
+        "optional_evidence": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "AVAILABLE",
+              "NOT_APPLICABLE",
+              "INPUT_MISSING",
+              "COMPUTATION_FAILED",
+              "AMBIGUOUS",
+              "NOT_COMPUTED",
+              "UNSUPPORTED_FORMAT"
+            ]
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true,
+      "description": "Locus assessment; additional GUI-only fields are a deliberate extension point."
+    },
+    "evidenceRecord": {
+      "type": "object",
+      "required": [
+        "record_schema_version",
+        "record_id",
+        "case_id",
+        "subject_id",
+        "sample_id",
+        "locus_id",
+        "caller",
+        "caller_version",
+        "analysis_source",
+        "source_file_id",
+        "source_file_sha256",
+        "native_record_identifier",
+        "native_allele_identifier",
+        "associated_sequence_id",
+        "assignment_state",
+        "reference_build",
+        "chromosome",
+        "start",
+        "end",
+        "coordinate_convention",
+        "reported_motif",
+        "reported_motif_chain",
+        "reported_repeat_count",
+        "reported_repeat_length_bp",
+        "supporting_reads",
+        "total_spanning_reads",
+        "quality_state",
+        "raw_fields",
+        "normalization_warnings"
+      ],
+      "properties": {
+        "record_schema_version": {
+          "const": "1.0"
+        },
+        "record_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "sample_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "locus_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "source_file_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "caller": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caller_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "analysis_source": {
+          "enum": [
+            "RAW_READS",
+            "ASSEMBLED_CONTIG"
+          ]
+        },
+        "source_file_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Lowercase SHA-256 digest."
+        },
+        "native_record_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Native record identity or explicit unavailable value."
+        },
+        "native_allele_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Native allele identity; never interpreted as a haplotype."
+        },
+        "associated_sequence_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+              "description": "Safe, non-empty serialized identifier."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Direct sequence association, when provided by assembly analysis."
+        },
+        "assignment_state": {
+          "enum": [
+            "DIRECT_SEQUENCE_ASSOCIATION",
+            "UNASSIGNED",
+            "ASSIGNMENT_NOT_APPLICABLE"
+          ]
+        },
+        "reference_build": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chromosome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reported start or unavailable."
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reported end or unavailable."
+        },
+        "coordinate_convention": {
+          "enum": [
+            "zero_based_half_open",
+            "one_based_closed",
+            "inter_base"
+          ]
+        },
+        "reported_motif": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Exact caller motif text or unavailable."
+        },
+        "reported_motif_chain": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {}
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Structured caller motif chain; never flattened."
+        },
+        "reported_repeat_count": {
+          "anyOf": [
+            {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Exact textual value is preferred for lossless decimal serialization."
+        },
+        "reported_repeat_length_bp": {
+          "anyOf": [
+            {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Exact textual value is preferred for lossless decimal serialization."
+        },
+        "supporting_reads": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Caller support or unavailable."
+        },
+        "total_spanning_reads": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Caller spanning read count or unavailable."
+        },
+        "quality_state": {
+          "enum": [
+            "AVAILABLE",
+            "NOT_APPLICABLE",
+            "INPUT_MISSING",
+            "COMPUTATION_FAILED",
+            "AMBIGUOUS",
+            "NOT_COMPUTED",
+            "UNSUPPORTED_FORMAT"
+          ]
+        },
+        "raw_fields": {
+          "type": "object",
+          "description": "Unmapped native caller fields, retaining strings, arrays, and nested structure.",
+          "additionalProperties": true
+        },
+        "normalization_warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Reasons shared values are unavailable or require caution."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

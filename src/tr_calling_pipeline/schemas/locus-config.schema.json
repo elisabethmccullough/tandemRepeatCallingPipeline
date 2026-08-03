@@ -1,0 +1,388 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/locus-config.schema.json",
+  "title": "Pipeline locus configuration",
+  "description": "Versioned repeat-locus definition; development releases may retain explicit null biological placeholders.",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "locus_config_id",
+    "locus_config_version",
+    "release_status",
+    "locus",
+    "measurement",
+    "repeat_blocks",
+    "caller_resources",
+    "gui_contract"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "description": "Contract version."
+    },
+    "locus_config_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Safe, non-empty serialized identifier."
+    },
+    "locus_config_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Configuration version."
+    },
+    "release_status": {
+      "enum": [
+        "development",
+        "released",
+        "deprecated"
+      ],
+      "description": "Lifecycle state."
+    },
+    "locus": {
+      "type": "object",
+      "required": [
+        "locus_id",
+        "gene",
+        "reference_build",
+        "assembly_accession",
+        "chromosome",
+        "target_region"
+      ],
+      "properties": {
+        "locus_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "gene": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "reference_build": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference build."
+        },
+        "assembly_accession": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference assembly accession."
+        },
+        "chromosome": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Contig name."
+        },
+        "target_region": {
+          "$ref": "#/$defs/region"
+        }
+      },
+      "additionalProperties": false
+    },
+    "measurement": {
+      "type": "object",
+      "required": [
+        "coordinate_convention",
+        "left_flanking_anchor",
+        "right_flanking_anchor"
+      ],
+      "properties": {
+        "coordinate_convention": {
+          "enum": [
+            "zero_based_half_open",
+            "one_based_closed",
+            "inter_base"
+          ]
+        },
+        "left_flanking_anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Validated left anchor or explicit unknown."
+        },
+        "right_flanking_anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Validated right anchor or explicit unknown."
+        }
+      },
+      "additionalProperties": false
+    },
+    "repeat_blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/repeatBlock"
+      }
+    },
+    "caller_resources": {
+      "type": "object",
+      "required": [
+        "vamos",
+        "straglr",
+        "tandem_genotypes"
+      ],
+      "properties": {
+        "vamos": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "repeat_catalog"
+              ]
+            },
+            {
+              "required": [
+                "read_catalog",
+                "contig_catalog"
+              ]
+            }
+          ],
+          "properties": {
+            "repeat_catalog": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Resource path or explicit unavailable value."
+            },
+            "read_catalog": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Read-mode catalog resolved relative to this locus configuration."
+            },
+            "contig_catalog": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Contig-mode catalog resolved relative to this locus configuration."
+            }
+          },
+          "additionalProperties": false
+        },
+        "straglr": {
+          "type": "object",
+          "required": [
+            "repeat_catalog",
+            "allow_provisional_adapter",
+            "additional_arguments"
+          ],
+          "properties": {
+            "repeat_catalog": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Resource path or explicit unavailable value."
+            },
+            "allow_provisional_adapter": {
+              "type": "boolean",
+              "default": false
+            },
+            "additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false
+        },
+        "tandem_genotypes": {
+          "type": "object",
+          "required": [
+            "repeat_definition",
+            "allow_provisional_last_adapter",
+            "allow_provisional_tandem_genotypes_adapter",
+            "lastdb_additional_arguments",
+            "lastal_additional_arguments",
+            "tandem_genotypes_additional_arguments"
+          ],
+          "properties": {
+            "repeat_definition": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Resource path or explicit unavailable value."
+            },
+            "allow_provisional_last_adapter": {
+              "type": "boolean",
+              "default": false
+            },
+            "allow_provisional_tandem_genotypes_adapter": {
+              "type": "boolean",
+              "default": false
+            },
+            "lastdb_additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "lastal_additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "tandem_genotypes_additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "gui_contract": {
+      "type": "object",
+      "required": [
+        "comparison_panel_id",
+        "comparison_panel_version"
+      ],
+      "properties": {
+        "comparison_panel_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "comparison_panel_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true,
+      "description": "GUI linkage with extension point for provisional GUI-only fields."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "region": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "coordinate_convention"
+      ],
+      "properties": {
+        "start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "coordinate_convention": {
+          "enum": [
+            "zero_based_half_open",
+            "one_based_closed",
+            "inter_base"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "motif": {
+      "type": "object",
+      "required": [
+        "motif_id",
+        "canonical_sequence",
+        "aliases",
+        "rotations"
+      ],
+      "properties": {
+        "motif_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "canonical_sequence": {
+          "type": "string",
+          "pattern": "^[A-Za-z]+$"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rotations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "repeatBlock": {
+      "type": "object",
+      "required": [
+        "block_id",
+        "label",
+        "order",
+        "motifs",
+        "interruptions",
+        "spacers",
+        "partial_motifs_allowed"
+      ],
+      "properties": {
+        "block_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "motifs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/motif"
+          }
+        },
+        "interruptions": {
+          "type": "array",
+          "items": {}
+        },
+        "spacers": {
+          "type": "array",
+          "items": {}
+        },
+        "partial_motifs_allowed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

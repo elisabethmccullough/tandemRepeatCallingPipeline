@@ -22,6 +22,20 @@ bash scripts/run_pipeline.sh --config config/example.yaml --dry-run
 pytest
 ```
 
+An offline full-runner demonstration with two synthetic sequences and bundled
+cross-platform fake tools is available from any working directory:
+
+```bash
+tr-pipeline demo --output "/tmp/demo output"
+tr-pipeline validate-case-package --package "/tmp/demo output/portable synthetic case package"
+```
+
+The command executes all eleven stages, moves the resulting package, removes its
+source run, and independently validates it again. Every executable is recorded as
+`FAKE_TEST_TOOL` / `SYNTHETIC_INTEGRATION_TESTED`; real bioinformatics installations
+and laboratory workflows remain unverified. A separate internal
+`run_package_portability_demo` retains the focused package-only check.
+
 Edit a copy of `config/example.yaml` first. Relative input paths, `locus_config`,
 and `run.output_root` are resolved from the directory containing the supplied run
 configuration YAML, not from the invocation working directory. Absolute paths are

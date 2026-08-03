@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "coordinate_convention",
+    "mappings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "coordinate_convention": {
+      "const": "zero_based_half_open"
+    },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "record_schema_version",
+          "sequence_id",
+          "mapping_status",
+          "original_orientation",
+          "display_orientation",
+          "reverse_complement_required",
+          "coordinate_convention"
+        ],
+        "properties": {
+          "record_schema_version": {
+            "const": "1.0"
+          },
+          "coordinate_convention": {
+            "const": "zero_based_half_open"
+          },
+          "mapping_status": {
+            "enum": [
+              "UNIQUE_PRIMARY",
+              "MULTIPLE_PRIMARY",
+              "UNMAPPED",
+              "AMBIGUOUS",
+              "TRUNCATED",
+              "SECONDARY_ONLY",
+              "SUPPLEMENTARY_ONLY"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

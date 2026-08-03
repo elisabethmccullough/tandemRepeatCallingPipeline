@@ -1,0 +1,450 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umn.example/schemas/run-config.schema.json",
+  "title": "Pipeline run configuration",
+  "description": "Inputs, identity, execution, and optional GUI package settings for one pipeline run.",
+  "schema_version": "1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run",
+    "inputs",
+    "locus_config",
+    "case_package",
+    "execution"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "description": "Contract version."
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "subject_id",
+        "sample_id",
+        "locus_id",
+        "output_root",
+        "overwrite"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "case_id identifier."
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "subject_id identifier."
+        },
+        "sample_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "sample_id identifier."
+        },
+        "locus_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "locus_id identifier."
+        },
+        "output_root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "overwrite": {
+          "type": "boolean",
+          "description": "Whether an existing run output may be replaced."
+        }
+      },
+      "additionalProperties": false
+    },
+    "inputs": {
+      "type": "object",
+      "required": [
+        "assembly_fasta",
+        "assembly_records",
+        "mini_bam",
+        "mini_bam_index",
+        "reference_fasta",
+        "reference_fasta_index"
+      ],
+      "properties": {
+        "assembly_fasta": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "mini_bam": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "mini_bam_index": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "reference_fasta": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "reference_fasta_index": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "assembly_records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/assemblyRecord"
+          }
+        },
+        "reference_scope": {
+          "enum": [
+            "WHOLE_GENOME_REFERENCE",
+            "LOCAL_LOCUS_REFERENCE",
+            "UNKNOWN_REFERENCE_SCOPE"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "locus_config": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path resolved relative to the run configuration directory when not absolute."
+    },
+    "case_package": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "package_root",
+        "comparison_panel"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Create a GUI package."
+        },
+        "package_root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path resolved relative to the run configuration directory when not absolute."
+        },
+        "comparison_panel": {
+          "type": "object",
+          "required": [
+            "panel_id",
+            "panel_version",
+            "required"
+          ],
+          "properties": {
+            "panel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+              "description": "Safe, non-empty serialized identifier."
+            },
+            "panel_version": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Panel version."
+            },
+            "required": {
+              "type": "boolean",
+              "description": "Whether panel evidence is required."
+            }
+          },
+          "additionalProperties": false
+        },
+        "include_prepared_mini_bam": {"type": "boolean", "default": true},
+        "include_alignment_artifacts": {"type": "boolean", "default": true},
+        "include_native_outputs": {"type": "boolean", "default": true},
+        "include_command_records": {"type": "boolean", "default": true}
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "threads",
+        "dry_run"
+      ],
+      "properties": {
+        "threads": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum worker threads."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Plan without caller execution."
+        }
+      },
+      "additionalProperties": false
+    },
+    "assembly_alignment": {
+      "type": "object",
+      "properties": {
+        "minimap2_preset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secondary": {
+          "type": "boolean"
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "tools": {
+      "type": "object",
+      "properties": {
+        "samtools": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "minimap2": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "vamos": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            },
+            "allow_provisional_adapter": {
+              "type": "boolean",
+              "default": false,
+              "description": "Development-only opt-in to the unverified VAMOS 2.x command adapter. Omission is false."
+            },
+            "additional_arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false
+        },
+        "straglr": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "lastdb": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "lastal": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "tandem_genotypes": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "execution_mode": {
+              "enum": [
+                "NATIVE",
+                "APPTAINER"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "container": {
+      "type": "object",
+      "properties": {
+        "apptainer": {
+          "type": "object",
+          "required": [
+            "executable"
+          ],
+          "properties": {
+            "executable": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "binds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "assemblyRecord": {
+      "type": "object",
+      "required": [
+        "record_id",
+        "sequence_id",
+        "display_label",
+        "sequence_role"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "sequence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Safe, non-empty serialized identifier."
+        },
+        "display_label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable label."
+        },
+        "sequence_role": {
+          "enum": [
+            "PATIENT_HAPLOTYPE",
+            "PATIENT_CONSENSUS",
+            "REFERENCE_SEQUENCE",
+            "COMPARISON_SEQUENCE"
+          ],
+          "description": "Stable sequence-role vocabulary."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

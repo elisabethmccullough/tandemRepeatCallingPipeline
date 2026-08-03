@@ -87,7 +87,8 @@ def _load(path: Path) -> dict[str, Any]:
 
 
 def _schema(name: str) -> dict[str, Any]:
-    return _load(Path(__file__).resolve().parents[2] / "schemas" / name)
+    from .verification import schema_directory
+    return _load(schema_directory() / name)
 
 
 def _issue(issues: list[NormalizationValidationIssue], severity: str, code: str, message: str,
@@ -114,6 +115,12 @@ def _validate_document(value: Any, schema_name: str, path: Path,
             schema["properties"] = dict(schema["properties"])
             schema["properties"]["records"] = dict(schema["properties"]["records"])
             schema["properties"]["records"]["items"] = {}
+        run_items = schema.get("properties", {}).get("runs", {}).get("items", {})
+        if isinstance(run_items, dict) and isinstance(run_items.get("$ref"), str):
+            schema = dict(schema)
+            schema["properties"] = dict(schema["properties"])
+            schema["properties"]["runs"] = dict(schema["properties"]["runs"])
+            schema["properties"]["runs"]["items"] = _schema(Path(run_items["$ref"]).name)
         validate(value, schema)
         return True
     except (SchemaViolation, KeyError, TypeError) as exc:

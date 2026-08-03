@@ -1,0 +1,32 @@
+schema_version: "1.0"
+locus_config_id: SYNTHETIC_LOCUS_CONFIG
+locus_config_version: 1.0.0-synthetic
+release_status: development
+locus:
+  locus_id: SYNTHETIC-LOCUS
+  gene: SYNTHETIC_GENE
+  reference_build: SYNTHETIC_REFERENCE
+  assembly_accession: SYNTHETIC_ASSEMBLY
+  chromosome: chrSynthetic
+  target_region: {start: 9, end: 27, coordinate_convention: zero_based_half_open}
+measurement: {coordinate_convention: inter_base, left_flanking_anchor: null, right_flanking_anchor: null}
+repeat_blocks:
+  - block_id: SYNTHETIC_CAG
+    label: Synthetic CAG tract
+    order: 1
+    motifs:
+      - {motif_id: CAG, canonical_sequence: CAG, aliases: [], rotations: []}
+    interruptions: []
+    spacers: []
+    partial_motifs_allowed: false
+caller_resources:
+  vamos: {repeat_catalog: vamos-catalog.tsv}
+  straglr: {repeat_catalog: straglr-catalog.tsv, allow_provisional_adapter: true, additional_arguments: []}
+  tandem_genotypes:
+    repeat_definition: repeat-definition.tsv
+    allow_provisional_last_adapter: true
+    allow_provisional_tandem_genotypes_adapter: true
+    lastdb_additional_arguments: []
+    lastal_additional_arguments: []
+    tandem_genotypes_additional_arguments: []
+gui_contract: {comparison_panel_id: SYNTHETIC_PANEL, comparison_panel_version: development}
