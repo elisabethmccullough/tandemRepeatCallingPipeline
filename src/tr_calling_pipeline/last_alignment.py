@@ -126,18 +126,35 @@ def prepare_tandem_genotypes_stage(config, root: Path, config_directory: Path, *
     tools=[]
     for tid,key in ((ToolId.LASTDB,"lastdb"),(ToolId.LASTAL,"lastal")):
         tc=config.get("tools",{}).get(key,{}); tools.append(detect_last(tc.get("executable",key),config_directory,tc.get("required",False),tid))
-    repeat=_resource(config); status="DRY_RUN" if dry_run else None; warning=None
-    if repeat is None or not repeat.is_file(): status="INPUT_MISSING"; warning="explicit repeat definition is missing"
-    elif any(not t.resolved_executable for t in tools): status="TOOL_MISSING"; warning="configured LAST executable is unavailable"
+    repeat=_resource(config); status=None; warning=None; dry_warnings=[]
+    if repeat is None or not repeat.is_file():
+        status="INPUT_MISSING"; warning="explicit repeat definition is missing"
+        dry_warnings.append(warning)
+    for tool in tools:
+        if not tool.resolved_executable:
+            dry_warnings.append(f"configured {tool.tool_id.value} executable is unavailable")
+    if status is None and any(not t.resolved_executable for t in tools): status="TOOL_MISSING"; warning="configured LAST executable is unavailable"
     adapters=[]
     if status is None:
         try: adapters=[select_adapter(t.detected_version,allow_provisional=settings["allow_provisional_last_adapter"]) for t in tools]
         except UnsupportedLastVersion as exc: status="UNSUPPORTED_VERSION"; warning=str(exc)
+    if dry_run:
+        # Probe and report blockers, but a dry run is always truthfully a plan.
+        if all(t.resolved_executable for t in tools):
+            for tool in tools:
+                try: select_adapter(tool.detected_version,allow_provisional=settings["allow_provisional_last_adapter"])
+                except UnsupportedLastVersion as exc: dry_warnings.append(f"{tool.tool_id.value}: {exc}")
+        status="DRY_RUN"; warning="; ".join(dict.fromkeys(dry_warnings)) or "Dry run: LAST commands were planned but not executed"
     records=[]
     if status:
-        for m in json.loads((root/"03_assembly_alignment"/"patient-sequences.metadata.json").read_text()).get("sequences",[]):
+        patient_metadata=root/"03_assembly_alignment"/"patient-sequences.metadata.json"
+        metadata_records=json.loads(patient_metadata.read_text()).get("sequences",[]) if patient_metadata.is_file() else []
+        if dry_run and not patient_metadata.is_file():
+            warning += "; authoritative patient metadata is unavailable"
+        for m in metadata_records:
             records.append({"record_schema_version":"1.0","preparation_id":f"last-{m['sequence_id']}","stage_id":"06_prepare_tandem_genotypes","sequence_id":m["sequence_id"],"source_fasta_record_id":m["source_fasta_record_id"],"sequence_sha256":m["sequence_sha256"],"status":status,"lastdb_version":tools[0].detected_version,"lastal_version":tools[1].detected_version,"input_file_ids":[],"database_file_ids":[],"alignment_file_id":None,"alignment_file_sha256":None,"alignment_path":"","alignment_format":None,"coordinate_space":"UNKNOWN_COORDINATE_SPACE","repeat_definition_identity":asdict(file_identity(repeat)) if repeat and repeat.is_file() else None,"command_record_paths":[],"started_utc":utc_now(),"completed_utc":utc_now(),"warnings":[warning] if warning else [],"failure":None})
-        atomic_write_json(align_registry,{"record_schema_version":"1.0","alignments":[]}); atomic_write_json(metadata_registry,{"record_schema_version":"1.0","records":records}); atomic_write_json(summary_path,{"record_schema_version":"1.0","stage_id":"06_prepare_tandem_genotypes","status":status,"preparations":records,"warnings":[warning] if warning else [],"failure":None})
+        warnings=[warning] if warning else []
+        atomic_write_json(align_registry,{"record_schema_version":"1.0","alignments":[]}); atomic_write_json(metadata_registry,{"record_schema_version":"1.0","records":records}); atomic_write_json(summary_path,{"record_schema_version":"1.0","stage_id":"06_prepare_tandem_genotypes","status":status,"preparations":records,"warnings":warnings,"failure":None})
         if not dry_run and any(t.required for t in tools): raise RuntimeError(warning)
         return records
     fasta=root/"03_assembly_alignment"/"patient-sequences.fasta"; metadata_path=root/"03_assembly_alignment"/"patient-sequences.metadata.json"

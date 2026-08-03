@@ -3,7 +3,7 @@ import os,sys
 from pathlib import Path
 name=Path(sys.argv[0]).name
 if '--version' in sys.argv:
- print(('LAST 1450' if name in ('lastdb','lastal') else 'tandem-genotypes 0.1.0'),file=sys.stderr if os.getenv('VERSION_STDERR') else sys.stdout); raise SystemExit(0)
+ print(os.getenv('FAKE_VERSION') or ('LAST 1450' if name in ('lastdb','lastal') else 'tandem-genotypes 0.1.0'),file=sys.stderr if os.getenv('VERSION_STDERR') else sys.stdout); raise SystemExit(0)
 if os.getenv('FAKE_EXIT'): raise SystemExit(int(os.getenv('FAKE_EXIT')))
 if name=='lastdb':
  prefix=Path(sys.argv[-2]); fasta=Path(sys.argv[-1]); prefix.with_suffix('.prj').write_text('fake database\n'); prefix.with_suffix('.source').write_text(fasta.read_text().splitlines()[0][1:]+'\n')

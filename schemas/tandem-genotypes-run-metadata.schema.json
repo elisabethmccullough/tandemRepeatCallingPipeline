@@ -70,7 +70,8 @@
         "TOOL_MISSING",
         "INPUT_MISSING",
         "UNSUPPORTED_VERSION",
-        "UNSUPPORTED_FORMAT"
+        "UNSUPPORTED_FORMAT",
+        "NOT_COMPUTED"
       ]
     },
     "alignment_identity": {

@@ -85,7 +85,7 @@ def run_tandem_genotypes_stage(config, root: Path, config_directory: Path, *, ov
     tool=resolve_tool(Tool(ToolId.TANDEM_GENOTYPES,"tandem-genotypes",tc.get("executable","tandem-genotypes"),required),config_directory)
     if tool.resolved_executable: tool=detect_version(tool,pattern=r"(?i)(?:tandem-genotypes[^0-9]*)?v?([0-9]+(?:\.[0-9]+)+)")
     resources=load_locus_config(config["locus_config"])["caller_resources"]["tandem_genotypes"]; repeat=_resource(config)
-    prep_path=root/"07_tandem_genotypes_preparation"/"alignment-metadata.json"; preparations=json.loads(prep_path.read_text())["records"] if prep_path.is_file() else []
+    prep_path=root/"07_tandem_genotypes_preparation"/"alignment-metadata.json"; preparations=json.loads(prep_path.read_text()).get("records",[]) if prep_path.is_file() else []
     terminal=None
     if dry_run: terminal="DRY_RUN"
     elif not tool.resolved_executable: terminal="TOOL_MISSING"
@@ -94,12 +94,21 @@ def run_tandem_genotypes_stage(config, root: Path, config_directory: Path, *, ov
     try: adapter=select_adapter(tool.detected_version,allow_provisional=resources["allow_provisional_tandem_genotypes_adapter"]) if terminal is None else None
     except UnsupportedTandemGenotypesVersion: terminal="UNSUPPORTED_VERSION"; adapter=None
     runs=[]; all_outputs=[]; all_records=[]
+    eligible=[prep for prep in preparations if prep.get("status")=="SUCCEEDED"]
+    if not dry_run and not eligible:
+        blocked={str(prep.get("status")) for prep in preparations}
+        for propagated in ("INPUT_MISSING","TOOL_MISSING","UNSUPPORTED_VERSION","UNSUPPORTED_FORMAT"):
+            if propagated in blocked:
+                terminal=propagated; break
+        else:
+            terminal="NOT_COMPUTED"
     if terminal:
-        atomic_write_json(out/"stage-outputs.json",{"record_schema_version":"1.0","outputs":[]}); atomic_write_json(out/"stage-normalized.json",{"record_schema_version":"1.0","evidence_state":"NOT_COMPUTED","records":[],"normalization_warnings":[terminal]}); atomic_write_json(out/"stage-summary.json",{"record_schema_version":"1.0","stage_id":"07_run_tandem_genotypes","status":terminal,"runs":[],"warnings":[terminal],"failure":None})
+        evidence_state = terminal if terminal in {"INPUT_MISSING", "UNSUPPORTED_FORMAT"} else "NOT_COMPUTED"
+        detail = terminal if preparations else f"{terminal}: no preparation records are available"
+        atomic_write_json(out/"stage-outputs.json",{"record_schema_version":"1.0","outputs":[]}); atomic_write_json(out/"stage-normalized.json",{"record_schema_version":"1.0","evidence_state":evidence_state,"records":[],"normalization_warnings":[detail]}); atomic_write_json(out/"stage-summary.json",{"record_schema_version":"1.0","stage_id":"07_run_tandem_genotypes","status":terminal,"runs":[],"warnings":[detail],"failure":None})
         if required and not dry_run: raise RuntimeError(f"required tandem-genotypes unavailable: {terminal}")
         return []
-    for prep in preparations:
-        if prep["status"]!="SUCCEEDED": continue
+    for prep in eligible:
         seqid=prep["sequence_id"]; alignment=Path(prep["alignment_path"])
         if not alignment.is_file() or __import__('hashlib').sha256(alignment.read_bytes()).hexdigest()!=prep["alignment_file_sha256"]: raise ValueError(f"alignment identity changed: {seqid}")
         final=out/seqid
