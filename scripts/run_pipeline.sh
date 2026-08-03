@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # Sequential scaffold orchestrator. External caller stages only describe intended commands.
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+repository_root=$(cd -- "$script_dir/.." && pwd)
+export PYTHONPATH="$repository_root/src${PYTHONPATH:+:$PYTHONPATH}"
 usage(){ echo "Usage: $0 --config FILE [--dry-run] [--start-stage STAGE] [--stop-stage STAGE]"; }
 config=""; dry=false; start="00_validate_inputs"; stop="08_normalize_outputs"
 while (($#)); do case "$1" in --config) config=${2:-}; shift 2;; --dry-run) dry=true; shift;; --start-stage) start=${2:-}; shift 2;; --stop-stage) stop=${2:-}; shift 2;; --help|-h) usage; exit 0;; *) echo "Error: unknown argument: $1" >&2; usage >&2; exit 2;; esac; done
 [[ -n "$config" ]] || { echo "Error: --config is required" >&2; exit 2; }; [[ -f "$config" ]] || { echo "Error: configuration not found: $config" >&2; exit 1; }
+config=$(realpath "$config")
 mapfile -t values < <(python - "$config" <<'PY'
 import sys
 from tr_calling_pipeline.config import load_config
@@ -37,15 +41,15 @@ index(){ local needle=$1; for i in "${!stages[@]}"; do [[ ${stages[$i]} == "$nee
 first=$(index "$start"); last=$(index "$stop"); (( first <= last )) || { echo "Error: start stage follows stop stage" >&2; exit 2; }
 dryarg=(); $dry && dryarg=(--dry-run)
 commands=(
-"scripts/00_validate_inputs.sh --config '$config' ${dryarg[*]}"
-"scripts/01_prepare_bam.sh --bam '$bam' --bai '$bai' --output-dir '$run/02_prepared_bam' ${dryarg[*]}"
-"scripts/02_align_assembly.sh --assembly '$assembly' --reference '$reference' --output-dir '$run/03_assembly_alignment' --threads '$threads' ${dryarg[*]}"
-"scripts/03_run_vamos_read.sh --input '$bam' --locus-config '$locus_config' --output-dir '$run/04_vamos_read' ${dryarg[*]}"
-"scripts/04_run_vamos_contig.sh --input '$assembly' --locus-config '$locus_config' --output-dir '$run/05_vamos_contig' ${dryarg[*]}"
-"scripts/05_run_straglr.sh --input '$bam' --locus-config '$locus_config' --output-dir '$run/06_straglr' ${dryarg[*]}"
-"scripts/06_prepare_tandem_genotypes.sh --input '$bam' --locus-config '$locus_config' --output-dir '$run/07_tandem_genotypes' ${dryarg[*]}"
-"scripts/07_run_tandem_genotypes.sh --input '$run/07_tandem_genotypes' --locus-config '$locus_config' --output-dir '$run/07_tandem_genotypes' ${dryarg[*]}"
-"python scripts/08_normalize_outputs.py --output-dir '$run/08_normalized' ${dryarg[*]}"
+"'$script_dir/00_validate_inputs.sh' --config '$config' ${dryarg[*]}"
+"'$script_dir/01_prepare_bam.sh' --bam '$bam' --bai '$bai' --output-dir '$run/02_prepared_bam' ${dryarg[*]}"
+"'$script_dir/02_align_assembly.sh' --assembly '$assembly' --reference '$reference' --output-dir '$run/03_assembly_alignment' --threads '$threads' ${dryarg[*]}"
+"'$script_dir/03_run_vamos_read.sh' --input '$bam' --locus-config '$locus_config' --output-dir '$run/04_vamos_read' ${dryarg[*]}"
+"'$script_dir/04_run_vamos_contig.sh' --input '$assembly' --locus-config '$locus_config' --output-dir '$run/05_vamos_contig' ${dryarg[*]}"
+"'$script_dir/05_run_straglr.sh' --input '$bam' --locus-config '$locus_config' --output-dir '$run/06_straglr' ${dryarg[*]}"
+"'$script_dir/06_prepare_tandem_genotypes.sh' --input '$bam' --locus-config '$locus_config' --output-dir '$run/07_tandem_genotypes' ${dryarg[*]}"
+"'$script_dir/07_run_tandem_genotypes.sh' --input '$run/07_tandem_genotypes' --locus-config '$locus_config' --output-dir '$run/07_tandem_genotypes' ${dryarg[*]}"
+"python '$script_dir/08_normalize_outputs.py' --output-dir '$run/08_normalized' ${dryarg[*]}"
 )
 for ((i=first;i<=last;i++)); do log="$run/logs/${stages[$i]}.log"; echo "==> ${stages[$i]}"; eval "${commands[$i]}" 2>&1 | tee "$log"; done
 echo "Pipeline scaffold completed: $run"
