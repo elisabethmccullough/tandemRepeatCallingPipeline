@@ -11,5 +11,6 @@ class ToolVersionError(PipelineError): pass
 class CommandExecutionError(PipelineError): pass
 class CommandTimeoutError(CommandExecutionError): pass
 class ExpectedOutputMissingError(CommandExecutionError): pass
+class OutputConflictError(PipelineError): pass
 class StageResumeError(PipelineError): pass
 class ProvenanceError(PipelineError): pass

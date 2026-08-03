@@ -137,6 +137,15 @@ uses separate minimap2, samtools view, sort, and index commands, each with execu
 provenance. Its default `asm20` preset is a **development default pending biological
 validation**, configurable through `assembly_alignment` with `secondary` and `threads`.
 
+The explicitly configured BAM and index are validated as a pair in a private stage
+directory. They are linked or copied to `configured-source.bam` and
+`configured-source.bam.bai`, and samtools operates only on that isolated pair; therefore
+an unrelated conventionally named index beside the original BAM cannot be selected.
+Prepared-BAM `idxstats` likewise operates on `prepared.mini.bam` beside the exact
+`prepared.mini.bam.bai`. Existing final prepared outputs are rejected unless overwrite
+is explicit. Hard-link fallback is limited to cross-filesystem or unsupported-link
+errors; unexpected storage errors remain failures rather than being hidden by a copy.
+
 The authoritative `patient-sequences.fasta` contains selected sequence letters exactly
 as stored (apart from deterministic 80-column wrapping) under stable `sequence_id`
 headers. Alignment never rewrites or reverse-complements it. Reverse mappings set
