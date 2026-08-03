@@ -171,7 +171,9 @@
         "straglr": {
           "type": "object",
           "required": [
-            "repeat_catalog"
+            "repeat_catalog",
+            "allow_provisional_adapter",
+            "additional_arguments"
           ],
           "properties": {
             "repeat_catalog": {

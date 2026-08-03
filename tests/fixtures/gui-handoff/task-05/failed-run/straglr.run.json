@@ -31,5 +31,9 @@
   "status": "FAILED",
   "warnings": [
     "failed run"
-  ]
+  ],
+  "caller_resource_settings": {
+    "allow_provisional_adapter": true,
+    "additional_arguments": []
+  }
 }

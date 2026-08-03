@@ -30,5 +30,9 @@
   "status": "UNSUPPORTED_FORMAT",
   "warnings": [
     "unsupported format"
-  ]
+  ],
+  "caller_resource_settings": {
+    "allow_provisional_adapter": true,
+    "additional_arguments": []
+  }
 }

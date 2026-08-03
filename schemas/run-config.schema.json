@@ -299,18 +299,6 @@
                 "NATIVE",
                 "APPTAINER"
               ]
-            },
-            "allow_provisional_adapter": {
-              "type": "boolean",
-              "default": false,
-              "description": "Development-only opt-in to unverified STRaglr 1.x syntax."
-            },
-            "additional_arguments": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "default": []
             }
           },
           "additionalProperties": false

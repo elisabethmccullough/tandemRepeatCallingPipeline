@@ -39,6 +39,12 @@ zero-based half-open coordinate convention are provisional and require explicit
 opt-in. Catalog contents are opaque to the pipeline. Future allele assignment,
 display columns, and cross-caller reconciliation are deferred.
 
+The canonical configuration paths are `tools.straglr` for executable identity,
+requiredness, and execution mode, and `caller_resources.straglr` in the locus file
+for `repeat_catalog`, `allow_provisional_adapter`, and `additional_arguments`.
+Published native registries contain only files from one isolated execution; overwrite
+replaces the native set and never merges files from separate runs.
+
 ## Matching GUI work
 
 The GUI can begin an unassigned STRaglr read-evidence group, native-field

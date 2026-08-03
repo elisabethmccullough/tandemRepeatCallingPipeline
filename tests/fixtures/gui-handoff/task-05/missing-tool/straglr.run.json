@@ -28,5 +28,9 @@
   "status": "TOOL_MISSING",
   "warnings": [
     "missing tool"
-  ]
+  ],
+  "caller_resource_settings": {
+    "allow_provisional_adapter": false,
+    "additional_arguments": []
+  }
 }

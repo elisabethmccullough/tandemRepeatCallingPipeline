@@ -8,8 +8,10 @@ from __future__ import annotations
 import csv
 from dataclasses import asdict, dataclass
 from enum import Enum
+import os
 from pathlib import Path
 import re
+import shutil
 from typing import Any
 from uuid import uuid4
 
@@ -175,10 +177,15 @@ def normalize_record(native: StraglrNativeRecord, *, config: dict[str, Any], cal
 
 def _catalog(config: dict[str, Any]) -> Path | None:
     locus_path = Path(config["locus_config"])
-    value = load_locus_config(locus_path)["caller_resources"]["straglr"].get("repeat_catalog")
+    value = _resources(config).get("repeat_catalog")
     if value is None: return None
     candidate = Path(value).expanduser()
     return candidate if candidate.is_absolute() else (locus_path.parent / candidate).resolve()
+
+
+def _resources(config: dict[str, Any]) -> dict[str, Any]:
+    """Return the single canonical STRaglr caller-resource configuration."""
+    return load_locus_config(config["locus_config"])["caller_resources"]["straglr"]
 
 
 def _metadata(config, status, tool, catalog, *, warnings=(), failure=None):
@@ -189,12 +196,15 @@ def _metadata(config, status, tool, catalog, *, warnings=(), failure=None):
         "associated_sequence_id":None, "assignment_state":UNASSIGNED, "status":status.value,
         "command_record_paths":[], "input_file_ids":[], "native_output_file_ids":[],
         "catalog_identity":asdict(file_identity(catalog)) if catalog and catalog.is_file() else None,
+        "caller_resource_settings":{"allow_provisional_adapter":bool(_resources(config).get("allow_provisional_adapter",False)),
+            "additional_arguments":list(_resources(config).get("additional_arguments",[]))},
         "started_utc":now, "completed_utc":now, "warnings":list(warnings), "failure":failure}
 
 
 def run_straglr_stage(config: dict[str, Any], root: Path, config_directory: Path, *, overwrite=False, dry_run=False):
     out=root/"06_straglr"; out.mkdir(parents=True,exist_ok=True)
     settings=config.get("tools",{}).get("straglr",{}); required=settings.get("required",False)
+    resources=_resources(config)
     tool=detect_straglr(settings.get("executable","straglr.py"),config_directory,required)
     catalog=_catalog(config)
     def terminal(status, warning, evidence="NOT_COMPUTED"):
@@ -211,14 +221,17 @@ def run_straglr_stage(config: dict[str, Any], root: Path, config_directory: Path
         return terminal(CallerRunStatus.DRY_RUN,"Dry run: no STRaglr command or biological output was created"+(f"; {', '.join(details)}" if details else ""))
     if not tool.resolved_executable: return terminal(CallerRunStatus.TOOL_MISSING,"configured STRaglr executable is unavailable")
     if tool.status is ToolStatus.VERSION_UNDETERMINED: return terminal(CallerRunStatus.UNSUPPORTED_VERSION,"STRaglr version is undetermined")
-    try: adapter=select_adapter(tool.detected_version,allow_provisional=settings.get("allow_provisional_adapter",False))
+    try: adapter=select_adapter(tool.detected_version,allow_provisional=resources.get("allow_provisional_adapter",False))
     except UnsupportedStraglrVersion as exc: return terminal(CallerRunStatus.UNSUPPORTED_VERSION,str(exc))
     if catalog is None or not catalog.is_file(): return terminal(CallerRunStatus.INPUT_MISSING,"explicit STRaglr repeat catalog is missing","INPUT_MISSING")
-    native=out/"native"; native.mkdir(parents=True,exist_ok=True)
+    native=out/"native"
+    if native.exists() and not overwrite:
+        raise FileExistsError(f"completed STRaglr native output set already exists: {native}")
+    work_native=out/f".native-work-{uuid4()}"; work_native.mkdir(parents=True)
     bam=root/"02_prepared_bam"/"prepared.mini.bam"; bai=root/"02_prepared_bam"/"prepared.mini.bam.bai"
     reference=Path(config["inputs"]["reference_fasta"]); reference_index=Path(config["inputs"]["reference_fasta_index"])
-    plan=adapter.plan(tool.resolved_executable,bam=bam,reference=reference,catalog=catalog,output_prefix=native/"straglr",
-        threads=config["execution"]["threads"],additional_arguments=settings.get("additional_arguments",[]))
+    plan=adapter.plan(tool.resolved_executable,bam=bam,reference=reference,catalog=catalog,output_prefix=work_native/"straglr",
+        threads=config["execution"]["threads"],additional_arguments=resources.get("additional_arguments",[]))
     record_path=out/"execution-records"/f"{plan.command_id}.json"
     declarations=(InputDeclaration("prepared-bam",str(bam)),InputDeclaration("prepared-bam-index",str(bai)),
         InputDeclaration("reference",str(reference)),InputDeclaration("reference-index",str(reference_index)),InputDeclaration("catalog",str(catalog)))
@@ -228,19 +241,34 @@ def run_straglr_stage(config: dict[str, Any], root: Path, config_directory: Path
     metadata=_metadata(config,CallerRunStatus.RUNNING,tool,catalog,warnings=(warning,)); metadata["input_file_ids"]=[f"input-{sha256_file(x.path)[:16]}" for x in declarations]
     try:
         execute(spec,tool,record_path,out/"logs")
-        # Adapters may produce multiple files. Register every file in this run's native directory.
-        native_paths=sorted(path for path in native.iterdir() if path.is_file())
+        produced_names=sorted(path.name for path in work_native.iterdir() if path.is_file())
+        if not produced_names:
+            raise UnsupportedStraglrFormat("STRaglr execution produced no native files")
+        # Publish one completed execution as a directory replacement. Old files
+        # never participate in discovery and failed work is never published.
+        old_native=out/f".native-old-{uuid4()}"
+        if native.exists(): os.replace(native,old_native)
+        try:
+            os.replace(work_native,native)
+        except Exception:
+            if old_native.exists(): os.replace(old_native,native)
+            raise
+        if old_native.exists(): shutil.rmtree(old_native)
+        native_paths=[native/name for name in produced_names]
         outputs=[NativeCallerOutput.from_path(path,file_id=f"straglr-native-{i+1}",caller="STRAGLR",caller_version=tool.detected_version,
             analysis_source=RAW_READS,producer_command_id=plan.command_id) for i,path in enumerate(native_paths)]
         records=[]; normalization_warnings=[warning]; status=CallerRunStatus.SUCCEEDED
         try:
-            records=[normalize_record(row,config=config,caller_version=tool.detected_version,source=outputs[0]) for row in parse_native_tsv(Path(plan.native_outputs[0]))]
+            primary=native/Path(plan.native_outputs[0]).name
+            primary_output=next(item for item in outputs if Path(item.path)==primary)
+            records=[normalize_record(row,config=config,caller_version=tool.detected_version,source=primary_output) for row in parse_native_tsv(primary)]
         except UnsupportedStraglrFormat as exc:
             status=CallerRunStatus.UNSUPPORTED_FORMAT; normalization_warnings.append(str(exc))
         metadata.update(status=status.value,command_record_paths=[str(record_path)],native_output_file_ids=[x.file_id for x in outputs],completed_utc=utc_now(),warnings=normalization_warnings)
         atomic_write_json(out/"straglr.outputs.json",{"record_schema_version":"1.0","outputs":[x.to_dict() for x in outputs]})
         atomic_write_json(out/"straglr.normalized.json",{"record_schema_version":"1.0","evidence_state":"AVAILABLE" if records else "UNSUPPORTED_FORMAT","records":records,"normalization_warnings":normalization_warnings})
     except Exception as exc:
+        if work_native.exists(): shutil.rmtree(work_native)
         metadata.update(status=CallerRunStatus.FAILED.value,completed_utc=utc_now(),failure={"error_type":type(exc).__name__,"message":str(exc)})
         atomic_write_json(out/"straglr.run.json",metadata); raise
     atomic_write_json(out/"straglr.run.json",metadata)
