@@ -1,0 +1,74 @@
+{
+  "record_schema_version": "1.0",
+  "command_id": "synthetic-command",
+  "stage_id": "03_run_vamos_read",
+  "tool_id": "VAMOS",
+  "tool_display_name": "VAMOS",
+  "configured_executable": "vamos",
+  "resolved_executable": "/opt/tools/vamos",
+  "tool_version": "1.2.3",
+  "pipeline_version": "0.1.0",
+  "pipeline_git_commit": "0123456789abcdef",
+  "pipeline_git_dirty": false,
+  "argv": [
+    "/opt/tools/vamos",
+    "--input",
+    "/synthetic/input.bam"
+  ],
+  "shell_rendering": "/opt/tools/vamos --input /synthetic/input.bam",
+  "working_directory": "/synthetic/work",
+  "environment_overrides": {},
+  "redacted_environment_keys": [],
+  "started_utc": "2026-08-03T04:12:30.123456Z",
+  "completed_utc": "2026-08-03T04:12:31.123456Z",
+  "duration_seconds": 1.0,
+  "exit_code": 0,
+  "stdout_log": "logs/out",
+  "stderr_log": "logs/err",
+  "combined_log": "logs/all",
+  "declared_inputs": [],
+  "declared_outputs": [],
+  "input_file_identities": [
+    {
+      "path": "inputs/input.bam",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 10
+    }
+  ],
+  "output_file_identities": [
+    {
+      "path": "outputs/native.txt",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 20
+    }
+  ],
+  "expected_exit_codes": [
+    0
+  ],
+  "timeout_seconds": 60,
+  "execution_mode": "APPTAINER",
+  "container_identity": {
+    "container_image": "containers/tool.sif",
+    "container_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bind_mounts": [
+      "/synthetic:/work:ro"
+    ],
+    "internal_executable": "vamos",
+    "internal_argv": [
+      "--version"
+    ],
+    "host_argv": [
+      "apptainer",
+      "exec",
+      "containers/tool.sif",
+      "vamos",
+      "--version"
+    ],
+    "host_working_directory": "/synthetic",
+    "container_working_directory": "/work"
+  },
+  "dry_run": false,
+  "overwrite": false,
+  "status": "SUCCEEDED",
+  "failure": null
+}

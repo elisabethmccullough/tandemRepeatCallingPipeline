@@ -1,0 +1,15 @@
+{
+  "record_schema_version": "1.0",
+  "tools": [
+    {
+      "tool_id": "VAMOS",
+      "display_name": "VAMOS",
+      "configured_executable": "vamos",
+      "resolved_executable": "/opt/tools/vamos",
+      "required": false,
+      "detected_version": "1.2.3",
+      "execution_mode": "NATIVE",
+      "status": "AVAILABLE"
+    }
+  ]
+}
