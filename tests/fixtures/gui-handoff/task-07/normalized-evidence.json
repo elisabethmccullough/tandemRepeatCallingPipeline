@@ -1,0 +1,368 @@
+{
+  "record_schema_version": "1.0",
+  "package_id": "normalized-task-07-fixture",
+  "case_id": "SYNTHETIC-CASE",
+  "subject_id": "SYNTHETIC-SUBJECT",
+  "sample_id": "SYNTHETIC-SAMPLE",
+  "locus_id": "SYNTHETIC-LOCUS",
+  "created_utc": "2026-01-01T00:00:00Z",
+  "records": [
+    {
+      "record_schema_version": "1.0",
+      "record_id": "fixture-1",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "SYNTHETIC-LOCUS",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "native_record_identifier": "native-1",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": null,
+      "assignment_state": "UNASSIGNED",
+      "source_file_id": "source-1",
+      "source_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "reference_build": "GRCh38",
+      "chromosome": "chrSynthetic",
+      "start": 100,
+      "end": 112,
+      "coordinate_convention": "zero_based_half_open",
+      "coordinate_space": "REFERENCE_COORDINATES",
+      "reported_motif": "CAG",
+      "reported_motif_chain": null,
+      "reported_repeat_count": "11",
+      "reported_repeat_length_bp": "33",
+      "supporting_reads": 3,
+      "total_spanning_reads": 8,
+      "quality_state": "AVAILABLE",
+      "raw_fields": {
+        "caller_specific_fixture_value": "raw-1"
+      },
+      "normalization_warnings": [
+        "Synthetic fixture only."
+      ]
+    },
+    {
+      "record_schema_version": "1.0",
+      "record_id": "fixture-2",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "SYNTHETIC-LOCUS",
+      "caller": "STRAGLR",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "native_record_identifier": "native-2",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": null,
+      "assignment_state": "UNASSIGNED",
+      "source_file_id": "source-2",
+      "source_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "reference_build": "GRCh38",
+      "chromosome": "chrSynthetic",
+      "start": 100,
+      "end": 112,
+      "coordinate_convention": "zero_based_half_open",
+      "coordinate_space": "REFERENCE_COORDINATES",
+      "reported_motif": "CAG",
+      "reported_motif_chain": null,
+      "reported_repeat_count": "12",
+      "reported_repeat_length_bp": "36",
+      "supporting_reads": 3,
+      "total_spanning_reads": 8,
+      "quality_state": "AVAILABLE",
+      "raw_fields": {
+        "caller_specific_fixture_value": "raw-2"
+      },
+      "normalization_warnings": [
+        "Synthetic fixture only."
+      ]
+    },
+    {
+      "record_schema_version": "1.0",
+      "record_id": "fixture-3",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "SYNTHETIC-LOCUS",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "native_record_identifier": "native-3",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": "patient-hap1",
+      "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+      "source_file_id": "source-3",
+      "source_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "reference_build": "GRCh38",
+      "chromosome": "chrSynthetic",
+      "start": 100,
+      "end": 112,
+      "coordinate_convention": "zero_based_half_open",
+      "coordinate_space": "REFERENCE_COORDINATES",
+      "reported_motif": "CAG",
+      "reported_motif_chain": null,
+      "reported_repeat_count": "13",
+      "reported_repeat_length_bp": "39",
+      "supporting_reads": null,
+      "total_spanning_reads": null,
+      "quality_state": "AVAILABLE",
+      "raw_fields": {
+        "caller_specific_fixture_value": "raw-3"
+      },
+      "normalization_warnings": [
+        "Synthetic fixture only."
+      ]
+    },
+    {
+      "record_schema_version": "1.0",
+      "record_id": "fixture-4",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "SYNTHETIC-LOCUS",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "native_record_identifier": "native-4",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": "patient-hap2",
+      "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+      "source_file_id": "source-4",
+      "source_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "reference_build": "GRCh38",
+      "chromosome": "chrSynthetic",
+      "start": 100,
+      "end": 112,
+      "coordinate_convention": "zero_based_half_open",
+      "coordinate_space": "REFERENCE_COORDINATES",
+      "reported_motif": "CAG",
+      "reported_motif_chain": null,
+      "reported_repeat_count": "14",
+      "reported_repeat_length_bp": "42",
+      "supporting_reads": null,
+      "total_spanning_reads": null,
+      "quality_state": "AVAILABLE",
+      "raw_fields": {
+        "caller_specific_fixture_value": "raw-4"
+      },
+      "normalization_warnings": [
+        "Synthetic fixture only."
+      ]
+    },
+    {
+      "record_schema_version": "1.0",
+      "record_id": "fixture-5",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "SYNTHETIC-LOCUS",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "native_record_identifier": "native-5",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": "patient-hap1",
+      "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+      "source_file_id": "source-5",
+      "source_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "reference_build": "GRCh38",
+      "chromosome": "chrSynthetic",
+      "start": 100,
+      "end": 112,
+      "coordinate_convention": "zero_based_half_open",
+      "coordinate_space": "REFERENCE_COORDINATES",
+      "reported_motif": "CAG",
+      "reported_motif_chain": null,
+      "reported_repeat_count": "15",
+      "reported_repeat_length_bp": "45",
+      "supporting_reads": null,
+      "total_spanning_reads": null,
+      "quality_state": "AVAILABLE",
+      "raw_fields": {
+        "caller_specific_fixture_value": "raw-5"
+      },
+      "normalization_warnings": [
+        "Synthetic fixture only."
+      ]
+    },
+    {
+      "record_schema_version": "1.0",
+      "record_id": "fixture-6",
+      "case_id": "SYNTHETIC-CASE",
+      "subject_id": "SYNTHETIC-SUBJECT",
+      "sample_id": "SYNTHETIC-SAMPLE",
+      "locus_id": "SYNTHETIC-LOCUS",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "native_record_identifier": "native-6",
+      "native_allele_identifier": "allele-1",
+      "associated_sequence_id": "patient-hap2",
+      "assignment_state": "DIRECT_SEQUENCE_ASSOCIATION",
+      "source_file_id": "source-6",
+      "source_file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "reference_build": "GRCh38",
+      "chromosome": "chrSynthetic",
+      "start": 100,
+      "end": 112,
+      "coordinate_convention": "zero_based_half_open",
+      "coordinate_space": "REFERENCE_COORDINATES",
+      "reported_motif": "CAG",
+      "reported_motif_chain": null,
+      "reported_repeat_count": "16",
+      "reported_repeat_length_bp": "48",
+      "supporting_reads": null,
+      "total_spanning_reads": null,
+      "quality_state": "AVAILABLE",
+      "raw_fields": {
+        "caller_specific_fixture_value": "raw-6"
+      },
+      "normalization_warnings": [
+        "Synthetic fixture only."
+      ]
+    }
+  ],
+  "source_registry": [
+    {
+      "file_id": "source-1",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "path": "native/source-1.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": null
+    },
+    {
+      "file_id": "source-2",
+      "caller": "STRAGLR",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "path": "native/source-2.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": null
+    },
+    {
+      "file_id": "source-3",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-3.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap1"
+    },
+    {
+      "file_id": "source-4",
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-4.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap2"
+    },
+    {
+      "file_id": "source-5",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-5.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap1"
+    },
+    {
+      "file_id": "source-6",
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "path": "native/source-6.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 0,
+      "media_type": "text/plain",
+      "producer_command_id": "fixture-command",
+      "associated_sequence_id": "patient-hap2"
+    }
+  ],
+  "caller_summaries": [
+    {
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 1,
+      "native_output_count": 1,
+      "associated_sequence_ids": [],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    },
+    {
+      "caller": "STRAGLR",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 1,
+      "native_output_count": 1,
+      "associated_sequence_ids": [],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    },
+    {
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 2,
+      "native_output_count": 2,
+      "associated_sequence_ids": [
+        "patient-hap1",
+        "patient-hap2"
+      ],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    },
+    {
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 2,
+      "native_output_count": 2,
+      "associated_sequence_ids": [
+        "patient-hap1",
+        "patient-hap2"
+      ],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    }
+  ],
+  "normalization_warnings": [
+    "Synthetic fixture only."
+  ]
+}

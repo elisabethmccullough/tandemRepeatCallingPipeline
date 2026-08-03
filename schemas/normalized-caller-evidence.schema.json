@@ -267,6 +267,14 @@
         "type": "string"
       },
       "description": "Reasons shared values are unavailable or require caution."
+    },
+    "coordinate_space": {
+      "enum": [
+        "REFERENCE_COORDINATES",
+        "PATIENT_SEQUENCE_COORDINATES",
+        "ALIGNMENT_COORDINATES",
+        "UNKNOWN_COORDINATE_SPACE"
+      ]
     }
   },
   "additionalProperties": false

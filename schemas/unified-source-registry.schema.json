@@ -1,52 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://umn.example/schemas/native-caller-output-registry.schema.json",
   "schema_version": "1.0",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "record_schema_version",
-    "outputs"
+    "sources"
   ],
   "properties": {
     "record_schema_version": {
       "const": "1.0"
     },
-    "outputs": {
+    "sources": {
       "type": "array",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "file_id",
-          "role",
-          "path",
-          "media_type",
-          "sha256",
-          "size_bytes",
           "caller",
           "caller_version",
           "analysis_source",
-          "producer_command_id"
+          "path",
+          "sha256",
+          "size_bytes",
+          "media_type",
+          "producer_command_id",
+          "associated_sequence_id"
         ],
         "properties": {
           "file_id": {
             "type": "string"
-          },
-          "role": {
-            "const": "NATIVE_CALLER_OUTPUT"
-          },
-          "path": {
-            "type": "string"
-          },
-          "media_type": {
-            "type": "string"
-          },
-          "sha256": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "size_bytes": {
-            "type": "integer",
-            "minimum": 0
           },
           "caller": {
             "enum": [
@@ -67,6 +51,20 @@
               "ASSEMBLED_CONTIG"
             ]
           },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "media_type": {
+            "type": "string"
+          },
           "producer_command_id": {
             "type": "string"
           },
@@ -76,10 +74,8 @@
               "null"
             ]
           }
-        },
-        "additionalProperties": false
+        }
       }
     }
-  },
-  "additionalProperties": false
+  }
 }

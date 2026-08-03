@@ -1,0 +1,71 @@
+{
+  "record_schema_version": "1.0",
+  "package_id": "normalized-task-07-fixture",
+  "case_id": "SYNTHETIC-CASE",
+  "caller_summaries": [
+    {
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 1,
+      "native_output_count": 1,
+      "associated_sequence_ids": [],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    },
+    {
+      "caller": "STRAGLR",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "RAW_READS",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 1,
+      "native_output_count": 1,
+      "associated_sequence_ids": [],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    },
+    {
+      "caller": "VAMOS",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 2,
+      "native_output_count": 2,
+      "associated_sequence_ids": [
+        "patient-hap1",
+        "patient-hap2"
+      ],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    },
+    {
+      "caller": "TANDEM_GENOTYPES",
+      "caller_version": "fixture-1.0",
+      "analysis_source": "ASSEMBLED_CONTIG",
+      "run_status": "SUCCEEDED",
+      "evidence_state": "AVAILABLE",
+      "record_count": 2,
+      "native_output_count": 2,
+      "associated_sequence_ids": [
+        "patient-hap1",
+        "patient-hap2"
+      ],
+      "warnings": [
+        "Synthetic fixture only."
+      ],
+      "failure": null
+    }
+  ],
+  "comparison_availability": [],
+  "note": "Inventory only; shared fields do not establish equivalent measurements."
+}

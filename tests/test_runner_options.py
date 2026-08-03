@@ -114,6 +114,8 @@ def test_stage_registry_has_workflow_roles_and_tools():
     assert stages["01_prepare_bam"].required_tools == ("SAMTOOLS",)
     assert stages["02_align_assembly"].required_tools == ("MINIMAP2", "SAMTOOLS")
     assert stages["05_run_straglr"].optional_tools == ("STRAGLR",)
-    assert stages["08_normalize_outputs"].expected_output_roles == ("NORMALIZED_EVIDENCE",)
+    assert stages["08_normalize_outputs"].expected_output_roles == (
+        "UNIFIED_NORMALIZED_EVIDENCE", "UNIFIED_EVIDENCE_SUMMARY",
+        "UNIFIED_SOURCE_REGISTRY", "UNIFIED_VALIDATION_REPORT")
     assert stages["09_build_case_package"].expected_output_roles == ("CASE_PACKAGE",)
     assert stages["10_validate_case_package"].required_input_roles == ("CASE_PACKAGE",)
